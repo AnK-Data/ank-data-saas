@@ -4,20 +4,21 @@ import { useAuth } from '../contexts/AuthContext'
 import { useLicense } from '../hooks/useLicense'
 import Spinner from '../components/ui/Spinner'
 
+/**
+ * Guard de autenticação — SEMPRE exige login explícito.
+ * Sem usuário no estado → /login (sem tentar restaurar sessão).
+ */
 export function ProtectedRoute() {
-  const { user, profile, initializing, profileLoading } = useAuth()
+  const { user, profile, profileLoading } = useAuth()
   const { license, loading: licenseLoading } = useLicense()
 
-  // 1. Restaurando sessão inicial do localStorage
-  if (initializing)    return <Spinner fullScreen />
+  // Sem sessão → login (validação obrigatória)
+  if (!user) return <Navigate to="/login" replace />
 
-  // 2. Sem sessão → login
-  if (!user)           return <Navigate to="/login" replace />
+  // Buscando perfil após login → spinner breve
+  if (profileLoading) return <Spinner fullScreen />
 
-  // 3. Perfil ainda carregando (query em background)
-  if (profileLoading)  return <Spinner fullScreen />
-
-  // 4. Perfil ausente no banco → aviso
+  // Perfil não encontrado no banco
   if (!profile) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-8">
@@ -28,10 +29,8 @@ export function ProtectedRoute() {
             <code className="bg-red-100 px-1 rounded">profiles</code>.
             Contate o administrador ANK Data.
           </p>
-          <button
-            onClick={() => { window.location.href = '/login' }}
-            className="text-sm font-medium text-red-700 underline"
-          >
+          <button onClick={() => { window.location.href = '/login' }}
+            className="text-sm font-medium text-red-700 underline">
             Sair e voltar ao login
           </button>
         </div>
@@ -39,23 +38,19 @@ export function ProtectedRoute() {
     )
   }
 
-  // 5. Admin ANK: acesso total
+  // Admin ANK → painel admin
   if (profile.papel === 'ank_admin') return <Outlet />
 
-  // 6. Franqueado: verifica licença
+  // Franqueado → verifica licença
   if (profile.tenant_id && licenseLoading) return <Spinner fullScreen />
 
-  const diasRestantes = license
+  const dias = license
     ? differenceInDays(parseISO(license.data_fim_ciclo), new Date())
     : -1
 
-  const blocked =
-    !license ||
-    license.status === 'EXPIRED' ||
-    license.status === 'SUSPENDED' ||
-    diasRestantes < 0
-
-  if (blocked) return <Navigate to="/lock" replace />
+  if (!license || license.status === 'EXPIRED' || license.status === 'SUSPENDED' || dias < 0) {
+    return <Navigate to="/lock" replace />
+  }
 
   return <Outlet />
 }

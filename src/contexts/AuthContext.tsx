@@ -14,9 +14,8 @@ import type { Profile } from '../types'
 interface AuthContextValue {
   user: User | null
   profile: Profile | null
-  initializing: boolean
+  /** True enquanto o perfil está sendo buscado após o signIn */
   profileLoading: boolean
-  /** Resolve após auth + perfil carregados. Retorna o perfil para redirect inteligente. */
   signIn: (email: string, password: string) => Promise<Profile | null>
   signUp: (email: string, password: string, fullName: string) => Promise<void>
   signOut: () => Promise<void>
@@ -25,45 +24,38 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-function hasStoredSession(): boolean {
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key?.startsWith('sb-') && key?.endsWith('-auth-token')) {
-        const raw = localStorage.getItem(key)
-        if (raw) return Boolean(JSON.parse(raw)?.access_token)
-      }
-    }
-  } catch { /* noop */ }
-  return false
+async function fetchProfileWithTimeout(userId: string): Promise<Profile | null> {
+  const query = supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single()
+    .then(({ data, error }) => {
+      if (error) { console.warn('[Auth] fetchProfile:', error.message); return null }
+      return data as Profile
+    })
+
+  const timeout = new Promise<null>(resolve =>
+    setTimeout(() => { console.warn('[Auth] fetchProfile timeout'); resolve(null) }, 10_000)
+  )
+
+  return Promise.race([query, timeout])
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]                     = useState<User | null>(null)
   const [profile, setProfile]               = useState<Profile | null>(null)
-  const [initializing, setInitializing]     = useState(hasStoredSession)
   const [profileLoading, setProfileLoading] = useState(false)
   const loadingRef = useRef(false)
 
-  // Retorna o profile carregado (para uso direto no signIn)
   const loadProfile = useCallback(async (userId: string): Promise<Profile | null> => {
-    if (loadingRef.current) return profile  // já está carregando
+    if (loadingRef.current) return profile
     loadingRef.current = true
     setProfileLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-      const p = error ? null : (data as Profile)
+      const p = await fetchProfileWithTimeout(userId)
       setProfile(p)
-      if (error) console.warn('[Auth] loadProfile:', error.message)
       return p
-    } catch (e) {
-      console.error('[Auth] loadProfile exception:', e)
-      setProfile(null)
-      return null
     } finally {
       loadingRef.current = false
       setProfileLoading(false)
@@ -75,30 +67,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, loadProfile])
 
   useEffect(() => {
-    let settled = false
-    const settle = () => { if (!settled) { settled = true; setInitializing(false) } }
-    const timeout = setTimeout(settle, 6000)
-
+    /*
+     * Escuta mudanças de autenticação (logout, token refresh).
+     * NÃO restaura sessão automaticamente — o usuário deve sempre fazer login.
+     * O SIGNED_OUT limpa o estado local.
+     */
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        settle()
-        if (session?.user) {
-          setUser(session.user)
-          loadingRef.current = false   // permite re-fetch no auth change
-          loadProfile(session.user.id)
-        } else {
+        console.log('[Auth]', event)
+
+        if (event === 'SIGNED_OUT' || !session) {
           setUser(null)
           setProfile(null)
           setProfileLoading(false)
           loadingRef.current = false
         }
+        // SIGNED_IN e TOKEN_REFRESHED são tratados pelo signIn() explícito
       },
     )
 
-    return () => { clearTimeout(timeout); subscription.unsubscribe() }
-  }, [loadProfile])
+    return () => subscription.unsubscribe()
+  }, [])
 
-  /** signIn: aguarda auth + perfil — retorna Profile para redirect inteligente */
+  /**
+   * Login explícito — único ponto de entrada para autenticação.
+   * Retorna o Profile carregado para redirect inteligente imediato.
+   */
   async function signIn(email: string, password: string): Promise<Profile | null> {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
@@ -119,14 +113,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
-    setUser(null); setProfile(null)
-    setProfileLoading(false); loadingRef.current = false
+    setUser(null)
+    setProfile(null)
+    setProfileLoading(false)
+    loadingRef.current = false
     await supabase.auth.signOut()
   }
 
   return (
     <AuthContext.Provider value={{
-      user, profile, initializing, profileLoading,
+      user, profile, profileLoading,
       signIn, signUp, signOut, refreshProfile,
     }}>
       {children}

@@ -31,10 +31,11 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   const [allowedModules, setAllowedModules] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
 
-  const isAdmin = profile?.papel === 'ank_admin'
+  // Papéis que têm acesso irrestrito a todos os módulos do seu painel
+  const isAdmin = profile?.papel === 'ank_admin' || profile?.papel === 'admin_franquia'
 
   useEffect(() => {
-    // ANK admin bypassa restrições de módulo
+    // Admins (ANK e Franquia) não precisam de lookup de permissões — acesso total
     if (!profile || isAdmin) {
       setLoading(false)
       return

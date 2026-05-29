@@ -25,6 +25,10 @@ import VendasPage             from '../pages/franqueado/VendasPage'
 import EstoquePage            from '../pages/franqueado/EstoquePage'
 import FinanceiroPage         from '../pages/franqueado/FinanceiroPage'
 import CRMPage                from '../pages/franqueado/CRMPage'
+import ConfiguracaoPage       from '../pages/franqueado/ConfiguracaoPage'
+import ConfigurarMenuPage     from '../pages/franqueado/ConfigurarMenuPage'
+import LojasPage              from '../pages/franqueado/LojasPage'
+import FranchiseUsersPage     from '../pages/franqueado/FranchiseUsersPage'
 
 export function AppRouter() {
   return (
@@ -57,7 +61,11 @@ export function AppRouter() {
             <Route path="vendas"      element={<VendasPage />} />
             <Route path="estoque"     element={<EstoquePage />} />
             <Route path="financeiro"  element={<FinanceiroPage />} />
-            <Route path="crm"         element={<CRMPage />} />
+            <Route path="crm"           element={<CRMPage />} />
+            <Route path="configuracoes"   element={<ConfiguracaoPage />} />
+            <Route path="configurar-menu" element={<ConfigurarMenuPage />} />
+            <Route path="lojas"           element={<LojasPage />} />
+            <Route path="usuarios"        element={<FranchiseUsersPage />} />
           </Route>
         </Route>
 

@@ -1,66 +1,190 @@
-import { NavLink } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { clsx } from 'clsx'
 import {
-  HomeIcon,
-  CloudArrowUpIcon,
-  ChartBarIcon,
-  CubeIcon,
-  BanknotesIcon,
-  UsersIcon,
+  HomeIcon, CloudArrowUpIcon, ChartBarIcon, CubeIcon,
+  BanknotesIcon, UsersIcon, Cog6ToothIcon, Bars3Icon,
+  ChevronDownIcon, ChevronRightIcon,
+  ArrowRightStartOnRectangleIcon, BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 import { usePermissions } from '../../contexts/PermissionsContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { getMenuPrefs } from '../../lib/menuPrefs'
 
-const ALL_MODULES = [
-  { to: '/franqueado',              slug: 'dashboard',  label: 'Dashboard',   icon: HomeIcon,          end: true },
-  { to: '/franqueado/upload',       slug: 'upload',     label: 'Upload',      icon: CloudArrowUpIcon         },
-  { to: '/franqueado/vendas',       slug: 'vendas',     label: 'Vendas',      icon: ChartBarIcon             },
-  { to: '/franqueado/estoque',      slug: 'estoque',    label: 'Estoque',     icon: CubeIcon                 },
-  { to: '/franqueado/financeiro',   slug: 'financeiro', label: 'Financeiro',  icon: BanknotesIcon            },
-  { to: '/franqueado/crm',          slug: 'crm',        label: 'CRM',         icon: UsersIcon                },
+const BASE_MODULES = [
+  { to: '/franqueado',            slug: 'dashboard',  label: 'Dashboard',  icon: HomeIcon,         end: true },
+  { to: '/franqueado/vendas',     slug: 'vendas',     label: 'Vendas',     icon: ChartBarIcon              },
+  { to: '/franqueado/estoque',    slug: 'estoque',    label: 'Estoque',    icon: CubeIcon                  },
+  { to: '/franqueado/crm',        slug: 'crm',        label: 'CRM',        icon: UsersIcon                 },
+  { to: '/franqueado/financeiro', slug: 'financeiro', label: 'Financeiro', icon: BanknotesIcon             },
+  { to: '/franqueado/upload',     slug: 'upload',     label: 'Upload',     icon: CloudArrowUpIcon          },
 ]
+
+const CONFIG_ITEMS = [
+  { to: '/franqueado/configuracoes',   label: 'Configuração Global', icon: Cog6ToothIcon         },
+  { to: '/franqueado/configurar-menu', label: 'Configurar Menu',     icon: Bars3Icon              },
+  { to: '/franqueado/lojas',           label: 'Lojas / PDVs',        icon: BuildingStorefrontIcon },
+  { to: '/franqueado/usuarios',        label: 'Usuários',            icon: UsersIcon              },
+]
+
+const sidebarBg    = 'bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700'
+const sectionLabel = 'mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500'
+const navBase      = 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all'
+const navInactive  = 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
+const navActive    = 'franchise-nav-active text-white shadow-sm'
+const subBase      = 'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-all'
+const subInactive  = 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'
+const subActive    = 'franchise-nav-active text-white'
 
 export default function FranchiseSidebar() {
   const { can } = usePermissions()
-  const { profile } = useAuth()
+  const { profile, signOut } = useAuth()
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const tenantId = profile?.tenant_id ?? ''
 
-  const visibleModules = ALL_MODULES.filter(m => can(m.slug))
+  const isConfigActive = CONFIG_ITEMS.some(i => pathname.startsWith(i.to))
+  const [configOpen, setConfigOpen] = useState(isConfigActive)
+
+  // ── Estado reativo dos módulos ────────────────────────────────────────────
+  const [modules, setModules] = useState(() => buildModules(tenantId, can))
+
+  const refresh = useCallback(() => {
+    setModules(buildModules(tenantId, can))
+  }, [tenantId, can])
+
+  // Recalcula quando o tenant mudar ou permissões carregarem
+  useEffect(() => { refresh() }, [refresh])
+
+  // Recalcula quando o usuário salvar as preferências de menu
+  useEffect(() => {
+    window.addEventListener('ank:menu-prefs-updated', refresh)
+    return () => window.removeEventListener('ank:menu-prefs-updated', refresh)
+  }, [refresh])
+
+  const isAdmin = profile?.papel === 'admin_franquia'
+
+  async function handleSignOut() {
+    try { await signOut(); navigate('/login', { replace: true }) }
+    catch { toast.error('Erro ao sair.') }
+  }
 
   return (
-    <aside className="flex h-full w-60 shrink-0 flex-col bg-ank-950 text-white">
+    <aside className={`flex h-full w-60 shrink-0 flex-col transition-colors duration-200 ${sidebarBg}`}>
+
       {/* Brand */}
-      <div className="flex h-16 items-center gap-3 border-b border-white/10 px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ank-500 font-bold text-sm">A</div>
+      <div className="flex h-16 items-center gap-3 border-b border-slate-200 dark:border-slate-700 px-5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl franchise-btn-primary font-bold text-white text-sm shadow">
+          A
+        </div>
         <div className="leading-tight min-w-0">
-          <p className="text-sm font-bold truncate">ANK Data</p>
-          <p className="text-[10px] text-white/40 truncate">{profile?.nome ?? 'Franqueado'}</p>
+          <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">ANK Data</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">Painel Franqueado</p>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">Menu</p>
-        <ul className="space-y-0.5">
-          {visibleModules.map(({ to, label, icon: Icon, end }) => (
-            <li key={to}>
-              <NavLink to={to} end={end}
-                className={({ isActive }) => clsx(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive ? 'bg-ank-700 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white',
-                )}>
-                <Icon className="h-5 w-5 shrink-0" />
-                {label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+
+        {/* Menu principal */}
+        <div>
+          <p className={sectionLabel}>Menu</p>
+          <ul className="space-y-0.5">
+            {modules.map(({ to, label, icon: Icon, end }) => (
+              <li key={to}>
+                <NavLink to={to} end={end}
+                  className={({ isActive }) => clsx(navBase, isActive ? navActive : navInactive)}>
+                  <Icon className="h-5 w-5 shrink-0" />
+                  {label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Sistema — apenas admin_franquia */}
+        {isAdmin && (
+          <div>
+            <p className={sectionLabel}>Sistema</p>
+            <div>
+              <button
+                onClick={() => setConfigOpen(o => !o)}
+                className={clsx(navBase, 'w-full justify-between',
+                  isConfigActive ? navActive : navInactive)}
+              >
+                <div className="flex items-center gap-3">
+                  <Cog6ToothIcon className="h-5 w-5 shrink-0" />
+                  <span>Configuração</span>
+                </div>
+                {configOpen
+                  ? <ChevronDownIcon className="h-3.5 w-3.5 opacity-60" />
+                  : <ChevronRightIcon className="h-3.5 w-3.5 opacity-60" />
+                }
+              </button>
+
+              {configOpen && (
+                <ul className="mt-1 ml-3 space-y-0.5 border-l-2 border-slate-200 dark:border-slate-700 pl-3">
+                  {CONFIG_ITEMS.map(({ to, label, icon: Icon }) => (
+                    <li key={to}>
+                      <NavLink to={to}
+                        className={({ isActive }) => clsx(subBase, isActive ? subActive : subInactive)}>
+                        <Icon className="h-4 w-4 shrink-0" />
+                        {label}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
-      <div className="border-t border-white/10 px-4 py-3">
-        <p className="text-[11px] text-white/20 text-center">
-          © {new Date().getFullYear()} ANK Data
-        </p>
+      {/* ── Rodapé: usuário + sair ─────────────────────────────────── */}
+      <div className="border-t border-slate-200 dark:border-slate-700 px-4 py-3">
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full
+            bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-400
+            font-semibold text-sm uppercase select-none">
+            {(profile?.nome ?? 'F').charAt(0)}
+          </div>
+
+          {/* Nome */}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+              {profile?.nome ?? '—'}
+            </p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
+              {profile?.papel === 'admin_franquia' ? 'Admin Franquia'
+                : profile?.papel === 'gerente' ? 'Gerente'
+                : profile?.papel === 'vendedor' ? 'Vendedor' : 'Controller'}
+            </p>
+          </div>
+
+          {/* Botão sair */}
+          <button
+            onClick={handleSignOut}
+            title="Sair da conta"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200
+              hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
+          </button>
+        </div>
       </div>
     </aside>
   )
+}
+
+function buildModules(tenantId: string, can: (s: string) => boolean) {
+  const prefs = tenantId ? getMenuPrefs(tenantId) : null
+  return BASE_MODULES
+    .filter(m => {
+      const visible = prefs?.[m.slug]?.visible
+      return (visible !== undefined ? visible : true) && can(m.slug)
+    })
+    .map(m => ({ ...m, order: prefs?.[m.slug]?.order ?? BASE_MODULES.findIndex(b => b.slug === m.slug) + 1 }))
+    .sort((a, b) => a.order - b.order)
 }

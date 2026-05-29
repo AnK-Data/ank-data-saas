@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
@@ -20,6 +21,17 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      // Cores dinâmicas da franquia (White Label — Spec 11)
+      colors: {
+        'fp': {
+          DEFAULT: 'var(--fp-primary, #2563eb)',
+          light:   'var(--fp-primary-light, #3b82f6)',
+          dark:    'var(--fp-primary-dark, #1d4ed8)',
+        },
+        'fs': {
+          DEFAULT: 'var(--fp-secondary, #06b6d4)',
+        },
       },
     },
   },

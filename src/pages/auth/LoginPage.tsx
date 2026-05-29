@@ -5,13 +5,12 @@ import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/
 import { useAuth } from '../../contexts/AuthContext'
 import Button from '../../components/ui/Button'
 import AnkMascot from '../../components/AnkMascot'
-import Spinner from '../../components/ui/Spinner'
 
 const ADMIN_ROLES = ['ank_admin']
 
 export default function LoginPage() {
-  const { signIn, initializing } = useAuth()
-  const navigate = useNavigate()
+  const { signIn } = useAuth()
+  const navigate   = useNavigate()
 
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -19,14 +18,11 @@ export default function LoginPage() {
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
 
-  if (initializing) return <Spinner fullScreen />
-
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      // signIn aguarda auth + perfil — retorna Profile para redirect inteligente
       const profile = await signIn(email, password)
       const dest = profile && ADMIN_ROLES.includes(profile.papel)
         ? '/admin-ank'
@@ -43,7 +39,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen">
-      {/* ── Painel esquerdo ────────────────────────────────────────────── */}
+      {/* ── Painel esquerdo ─────────────────────────────────────────── */}
       <div
         className="hidden lg:flex lg:w-[58%] relative flex-col items-center justify-center overflow-hidden select-none"
         style={{ background: 'linear-gradient(135deg, #172554 0%, #1e3a8a 40%, #1d4ed8 100%)' }}
@@ -72,7 +68,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* ── Painel direito ─────────────────────────────────────────────── */}
+      {/* ── Painel direito ──────────────────────────────────────────── */}
       <div className="flex flex-1 flex-col items-center justify-center bg-white px-8 py-12">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex flex-col items-center lg:hidden">
@@ -113,7 +109,7 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" loading={loading} className="w-full !py-3 !text-sm !font-semibold !rounded-xl mt-2">
-              {loading ? 'Conectando…' : 'Entrar'}
+              {loading ? 'Validando…' : 'Entrar'}
             </Button>
           </form>
 

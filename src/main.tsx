@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
 import { PermissionsProvider } from './contexts/PermissionsContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { AppRouter } from './router/AppRouter'
 import EnvGuard from './components/EnvGuard'
 import './index.css'
@@ -10,6 +11,7 @@ import './index.css'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <EnvGuard>
+      <ThemeProvider>
       <AuthProvider>
         <PermissionsProvider>
         <AppRouter />
@@ -24,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
         />
         </PermissionsProvider>
       </AuthProvider>
+      </ThemeProvider>
     </EnvGuard>
   </StrictMode>,
 )
