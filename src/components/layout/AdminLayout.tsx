@@ -5,10 +5,13 @@ import AdminHeader from './AdminHeader'
 const pageTitles: Record<string, string> = {
   '/admin-ank':                 'Dashboard',
   '/admin-ank/tenants':         'Gerenciamento de Franquias',
-  '/admin-ank/licenses':        'Controle de Licenciamento',
+  '/admin-ank/licenses':        'Planos',
   '/admin-ank/users':           'Usuários',
   '/admin-ank/compliance':      'Monitor de Conformidade',
-  '/admin-ank/clientes':        'Clientes',
+  '/admin-ank/clientes':                'Clientes — Lista',
+  '/admin-ank/clientes/onboarding':     'Onboarding de Clientes',
+  '/admin-ank/clientes/kanban':         'Kanban de Implantação',
+  '/admin-ank/clientes/contratos':      'Contratos',
   '/admin-ank/configuracao':    'Configuração Global',
   '/admin-ank/configurar-menu': 'Organizar Menu',
 }

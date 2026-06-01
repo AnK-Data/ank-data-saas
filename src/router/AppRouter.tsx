@@ -19,6 +19,9 @@ import CompliancePage       from '../pages/admin/CompliancePage'
 import AdminConfigPage      from '../pages/admin/AdminConfigPage'
 import AdminMenuPage        from '../pages/admin/AdminMenuPage'
 import ClientesListPage     from '../pages/admin/ClientesListPage'
+import OnboardingPage       from '../pages/admin/OnboardingPage'
+import ContratosPage        from '../pages/admin/ContratosPage'
+import OnboardingKanbanPage from '../pages/admin/OnboardingKanbanPage'
 
 // Painel Franqueado
 import FranchiseLayout        from '../pages/franqueado/FranchiseLayout'
@@ -53,7 +56,10 @@ export function AppRouter() {
               <Route path="tenants"   element={<TenantsPage />} />
               <Route path="licenses"  element={<LicensesPage />} />
               <Route path="users"     element={<UsersPage />} />
-              <Route path="clientes"        element={<ClientesListPage />} />
+              <Route path="clientes"                element={<ClientesListPage />} />
+              <Route path="clientes/onboarding"     element={<OnboardingPage />} />
+              <Route path="clientes/contratos"      element={<ContratosPage />} />
+              <Route path="clientes/kanban"         element={<OnboardingKanbanPage />} />
               <Route path="compliance"      element={<CompliancePage />} />
               <Route path="configuracao"    element={<AdminConfigPage />} />
               <Route path="configurar-menu" element={<AdminMenuPage />} />

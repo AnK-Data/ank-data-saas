@@ -6,7 +6,7 @@ import {
   HomeIcon, BuildingStorefrontIcon, DocumentCheckIcon,
   ShieldCheckIcon, UsersIcon, Cog6ToothIcon, Bars3Icon,
   ChevronDownIcon, ChevronRightIcon, ArrowRightStartOnRectangleIcon,
-  UserGroupIcon, ListBulletIcon,
+  UserGroupIcon, ListBulletIcon, ViewColumnsIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import AnkLogo from '../AnkLogo'
@@ -18,11 +18,17 @@ import { loadAdminColors } from '../../pages/admin/AdminConfigPage'
 
 const BASE_NAV = [
   { to: '/admin-ank',            icon: HomeIcon,               label: 'Dashboard',    slug: 'dashboard',   end: true },
-  { to: '/admin-ank/clientes',   icon: UserGroupIcon,          label: 'Clientes',     slug: 'clientes'             },
   { to: '/admin-ank/tenants',    icon: BuildingStorefrontIcon, label: 'Franquias',    slug: 'tenants'              },
-  { to: '/admin-ank/licenses',   icon: DocumentCheckIcon,      label: 'Licenças',     slug: 'licenses'             },
+  { to: '/admin-ank/licenses',   icon: DocumentCheckIcon,      label: 'Planos',       slug: 'licenses'             },
   { to: '/admin-ank/users',      icon: UsersIcon,              label: 'Usuários',     slug: 'users'                },
   { to: '/admin-ank/compliance', icon: ShieldCheckIcon,        label: 'Conformidade', slug: 'compliance'           },
+]
+
+const CLIENTES_ITEMS = [
+  { to: '/admin-ank/clientes',             icon: ListBulletIcon,    label: 'Lista'                   },
+  { to: '/admin-ank/clientes/onboarding',  icon: UserGroupIcon,     label: 'Onboarding · Novo cli.'  },
+  { to: '/admin-ank/clientes/kanban',      icon: ViewColumnsIcon,   label: 'Onboarding · Kanban'     },
+  { to: '/admin-ank/clientes/contratos',   icon: DocumentCheckIcon, label: 'Contratos'               },
 ]
 
 const ADMIN_MENU_KEY = 'ank_admin_menu_prefs'
@@ -58,6 +64,9 @@ export default function AdminSidebar() {
   const navigate             = useNavigate()
   const { isDark }           = useTheme()
   const [perfilOpen, setPerfilOpen]   = useState(false)
+  const [clientesOpen, setClientesOpen] = useState(
+    CLIENTES_ITEMS.some(i => pathname.startsWith(i.to))
+  )
   const [configOpen, setConfigOpen]   = useState(
     CONFIG_ITEMS.some(i => pathname.startsWith(i.to))
   )
@@ -118,8 +127,52 @@ export default function AdminSidebar() {
           <p className={`mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest ${textMuted}`}>
             Painel Administrativo
           </p>
+
+          {/* Dashboard */}
+          <ul className="space-y-0.5 mb-1">
+            {navItems.filter(i => i.slug === 'dashboard').map(({ to, icon: Icon, label, end }) => (
+              <li key={to}>
+                <NavLink to={to} end={end}
+                  className={({ isActive }) => clsx(navBase, isActive ? 'text-white' : `${textBase} ${textHover}`)}
+                  style={({ isActive }) => isActive ? { backgroundColor: 'var(--admin-primary, #5086C6)' } : {}}>
+                  <Icon className="h-5 w-5 shrink-0" />{label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+
+          {/* Clientes (collapsível) */}
+          <div className="mb-1">
+            <button onClick={() => setClientesOpen(o => !o)}
+              className={clsx(navBase, 'w-full justify-between',
+                CLIENTES_ITEMS.some(i => pathname.startsWith(i.to)) ? 'text-white' : `${textBase} ${textHover}`)}
+              style={CLIENTES_ITEMS.some(i => pathname.startsWith(i.to))
+                ? { backgroundColor: 'color-mix(in srgb, var(--admin-primary, #5086C6) 30%, transparent)' }
+                : {}}>
+              <div className="flex items-center gap-3">
+                <UserGroupIcon className="h-5 w-5 shrink-0" />
+                <span>Clientes</span>
+              </div>
+              {clientesOpen ? <ChevronDownIcon className="h-3.5 w-3.5 opacity-60" /> : <ChevronRightIcon className="h-3.5 w-3.5 opacity-60" />}
+            </button>
+            {clientesOpen && (
+              <ul className={`mt-1 ml-3 space-y-0.5 border-l ${isDark ? 'border-white/10' : 'border-slate-200'} pl-3`}>
+                {CLIENTES_ITEMS.map(({ to, label, icon: Icon }) => (
+                  <li key={to}>
+                    <NavLink to={to} end
+                      className={({ isActive }) => clsx(subBase, isActive ? `text-white` : subTextInactive)}
+                      style={({ isActive }) => isActive ? { backgroundColor: 'var(--admin-primary, #5086C6)' } : {}}>
+                      <Icon className="h-4 w-4 shrink-0" />{label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Demais itens (sem Dashboard) */}
           <ul className="space-y-0.5">
-            {navItems.map(({ to, icon: Icon, label, end }) => (
+            {navItems.filter(i => i.slug !== 'dashboard').map(({ to, icon: Icon, label, end }) => (
               <li key={to}>
                 <NavLink to={to} end={end}
                   className={({ isActive }) => clsx(navBase, isActive ? 'text-white' : `${textBase} ${textHover}`)}
