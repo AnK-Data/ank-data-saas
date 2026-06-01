@@ -15,7 +15,8 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Modal from '../../components/ui/Modal'
 import Spinner from '../../components/ui/Spinner'
-import type { Profile, UserRole, Tenant } from '../../types'
+import type { Profile, UserRole, Tenant, AnkRole } from '../../types'
+import { PAPEL_LABELS, ANK_ROLES, isAnkRole } from '../../types'
 
 // ─── Tipagem local enriquecida com join ──────────────────────────────────────
 
@@ -30,26 +31,12 @@ interface RoleConfig {
 }
 
 const ROLE_CONFIG: Record<string, RoleConfig> = {
-  ank_admin: {
-    label: 'Admin ANK',
-    badge: 'bg-ank-900 text-white ring-ank-700',
-  },
-  admin_franquia: {
-    label: 'Admin Franquia',
-    badge: 'bg-violet-100 text-violet-800 ring-violet-400/30',
-  },
-  gerente: {
-    label: 'Gerente',
-    badge: 'bg-emerald-50 text-emerald-700 ring-emerald-500/20',
-  },
-  vendedor: {
-    label: 'Vendedor',
-    badge: 'bg-blue-50 text-blue-700 ring-blue-500/20',
-  },
-  controller_financeiro: {
-    label: 'Controller',
-    badge: 'bg-amber-50 text-amber-700 ring-amber-500/20',
-  },
+  ank_admin:      { label: PAPEL_LABELS['ank_admin'],      badge: 'bg-ank-900 text-white ring-ank-700' },
+  ank_suporte:    { label: PAPEL_LABELS['ank_suporte'],    badge: 'bg-ank-700 text-white ring-ank-500' },
+  ank_comercial:  { label: PAPEL_LABELS['ank_comercial'],  badge: 'bg-ank-600 text-white ring-ank-400' },
+  ank_financeiro: { label: PAPEL_LABELS['ank_financeiro'], badge: 'bg-ank-500 text-white ring-ank-300' },
+  ank_tech:       { label: PAPEL_LABELS['ank_tech'],       badge: 'bg-slate-700 text-white ring-slate-500' },
+  // Franqueados exibem label via PAPEL_LABELS dinamicamente
 }
 
 function RoleBadge({ papel }: { papel: string }) {
@@ -79,10 +66,10 @@ export default function UsersPage() {
 
   if (loading) return <Spinner fullScreen />
 
-  // Separação por nível de acesso
-  const ankAdmins     = users.filter(u => u.papel === 'ank_admin')
-  const franchiseAdmins = users.filter(u => u.papel === 'admin_franquia')
-  const operational   = users.filter(u => !['ank_admin', 'admin_franquia'].includes(u.papel))
+  // Separação por domínio
+  const ankAdmins     = users.filter(u => isAnkRole(u.papel))
+  const franchiseAdmins = users.filter(u => !isAnkRole(u.papel) && (u.papel === 'franqueado' || u.papel === 'sucessor'))
+  const operational   = users.filter(u => !isAnkRole(u.papel) && u.papel !== 'franqueado' && u.papel !== 'sucessor')
 
   return (
     <>
@@ -126,10 +113,10 @@ export default function UsersPage() {
                       <div className="flex items-center gap-3">
                         <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full
                           font-semibold text-sm uppercase
-                          ${user.papel === 'ank_admin'
+                          ${isAnkRole(user.papel)
                             ? 'bg-ank-900 text-white'
-                            : user.papel === 'admin_franquia'
-                            ? 'bg-violet-100 text-violet-700'
+                            : (user.papel === 'franqueado' || user.papel === 'sucessor')
+                            ? 'bg-amber-100 text-amber-700'
                             : 'bg-slate-100 text-slate-600'
                           }`}>
                           {user.nome.charAt(0)}
@@ -216,13 +203,13 @@ export default function UsersPage() {
 /**
  * O Admin ROOT da ANK Data pode convidar apenas dois tipos de usuários:
  *  1. Administrador Interno ANK Data  → papel: 'ank_admin'  (sem franquia)
- *  2. Admin de Franquia               → papel: 'admin_franquia' (franquia obrigatória)
+ *  2. Franqueado / Sucessor            → papel: 'franqueado' | 'sucessor' (franquia obrigatória)
  *
- * Usuários operacionais (Gerente, Vendedor, Controller) são criados pelo
- * próprio Admin Franquia dentro do painel do franqueado — não por aqui.
+ * Usuários operacionais (cargos Boticário) são criados pelo
+ * próprio Franqueado dentro do painel da franquia — não por aqui.
  */
 
-type InviteType = 'ank_admin' | 'admin_franquia'
+type InviteType = AnkRole | 'franqueado' | 'sucessor'
 
 interface InviteOption {
   value: InviteType
@@ -235,16 +222,51 @@ interface InviteOption {
 const INVITE_OPTIONS: InviteOption[] = [
   {
     value:            'ank_admin',
-    label:            'Administrador Interno ANK Data',
+    label:            PAPEL_LABELS['ank_admin'],
     description:      'Acesso completo ao painel Admin ROOT. Sem vínculo de franquia.',
     badge:            ROLE_CONFIG.ank_admin.badge,
     requiresFranquia: false,
   },
   {
-    value:            'admin_franquia',
-    label:            'Admin de Franquia',
-    description:      'Master da franquia selecionada. Gerenciará usuários operacionais no painel franqueado.',
-    badge:            ROLE_CONFIG.admin_franquia.badge,
+    value:            'ank_suporte',
+    label:            PAPEL_LABELS['ank_suporte'],
+    description:      'Leitura ampla para diagnóstico de franquias. Sem vínculo de franquia.',
+    badge:            ROLE_CONFIG.ank_suporte.badge,
+    requiresFranquia: false,
+  },
+  {
+    value:            'ank_comercial',
+    label:            PAPEL_LABELS['ank_comercial'],
+    description:      'Gestão de tenants, contratos e renovações.',
+    badge:            ROLE_CONFIG.ank_comercial.badge,
+    requiresFranquia: false,
+  },
+  {
+    value:            'ank_financeiro',
+    label:            PAPEL_LABELS['ank_financeiro'],
+    description:      'Visão de contratos, valores e status de licenças.',
+    badge:            ROLE_CONFIG.ank_financeiro.badge,
+    requiresFranquia: false,
+  },
+  {
+    value:            'ank_tech',
+    label:            PAPEL_LABELS['ank_tech'],
+    description:      'Acesso técnico — logs, infra e feature flags.',
+    badge:            ROLE_CONFIG.ank_tech.badge,
+    requiresFranquia: false,
+  },
+  {
+    value:            'franqueado',
+    label:            PAPEL_LABELS['franqueado'],
+    description:      'Franqueado master — visão comercial completa da franquia.',
+    badge:            'bg-amber-100 text-amber-800 ring-amber-400/30',
+    requiresFranquia: true,
+  },
+  {
+    value:            'sucessor',
+    label:            PAPEL_LABELS['sucessor'],
+    description:      'Sucessor do franqueado — mesma visão comercial.',
+    badge:            'bg-orange-100 text-orange-800 ring-orange-400/30',
     requiresFranquia: true,
   },
 ]
@@ -255,7 +277,7 @@ function InviteModal({ open, onClose, onSaved }: {
   onSaved: () => void
 }) {
   const [tenants, setTenants]       = useState<Pick<Tenant, 'id' | 'nome_franquia'>[]>([])
-  const [tipo, setTipo]             = useState<InviteType>('admin_franquia')
+  const [tipo, setTipo]             = useState<InviteType>('franqueado')
   const [nome, setNome]             = useState('')
   const [email, setEmail]           = useState('')
   const [senha, setSenha]           = useState('')
@@ -269,7 +291,7 @@ function InviteModal({ open, onClose, onSaved }: {
       TenantsService.listActive().then(({ data }) =>
         setTenants((data ?? []) as Pick<Tenant, 'id' | 'nome_franquia'>[])
       )
-      setNome(''); setEmail(''); setSenha(''); setTenantId(''); setTipo('admin_franquia')
+      setNome(''); setEmail(''); setSenha(''); setTenantId(''); setTipo('franqueado')
     }
   }, [open])
 
@@ -417,14 +439,14 @@ function EditUserModal({ open, user, onClose, onSaved }: {
   const [tenants, setTenants]   = useState<Pick<Tenant, 'id' | 'nome_franquia'>[]>([])
   const [nome, setNome]         = useState('')
   const [tenantId, setTenantId] = useState('')
-  const [papel, setPapel]       = useState<UserRole>('admin_franquia')
+  const [papel, setPapel]       = useState<UserRole>('franqueado')
   const [saving, setSaving]     = useState(false)
 
+  // No painel admin só editamos papéis ANK e os cargos de topo de franquia
   const editableRoles: { value: UserRole; label: string }[] = [
-    { value: 'admin_franquia',       label: 'Admin de Franquia' },
-    { value: 'gerente',              label: 'Gerente' },
-    { value: 'vendedor',             label: 'Vendedor' },
-    { value: 'controller_financeiro', label: 'Controller Financeiro' },
+    ...ANK_ROLES.map(r => ({ value: r as UserRole, label: PAPEL_LABELS[r] })),
+    { value: 'franqueado', label: PAPEL_LABELS['franqueado'] },
+    { value: 'sucessor',   label: PAPEL_LABELS['sucessor'] },
   ]
 
   useEffect(() => {

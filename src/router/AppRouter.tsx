@@ -16,6 +16,9 @@ import TenantsPage          from '../pages/admin/TenantsPage'
 import LicensesPage         from '../pages/admin/LicensesPage'
 import UsersPage            from '../pages/admin/UsersPage'
 import CompliancePage       from '../pages/admin/CompliancePage'
+import AdminConfigPage      from '../pages/admin/AdminConfigPage'
+import AdminMenuPage        from '../pages/admin/AdminMenuPage'
+import ClientesListPage     from '../pages/admin/ClientesListPage'
 
 // Painel Franqueado
 import FranchiseLayout        from '../pages/franqueado/FranchiseLayout'
@@ -29,6 +32,8 @@ import ConfiguracaoPage       from '../pages/franqueado/ConfiguracaoPage'
 import ConfigurarMenuPage     from '../pages/franqueado/ConfigurarMenuPage'
 import LojasPage              from '../pages/franqueado/LojasPage'
 import FranchiseUsersPage     from '../pages/franqueado/FranchiseUsersPage'
+import ComunicadosPage        from '../pages/franqueado/ComunicadosPage'
+import NotificacoesPage       from '../pages/franqueado/NotificacoesPage'
 
 export function AppRouter() {
   return (
@@ -48,7 +53,10 @@ export function AppRouter() {
               <Route path="tenants"   element={<TenantsPage />} />
               <Route path="licenses"  element={<LicensesPage />} />
               <Route path="users"     element={<UsersPage />} />
-              <Route path="compliance" element={<CompliancePage />} />
+              <Route path="clientes"        element={<ClientesListPage />} />
+              <Route path="compliance"      element={<CompliancePage />} />
+              <Route path="configuracao"    element={<AdminConfigPage />} />
+              <Route path="configurar-menu" element={<AdminMenuPage />} />
             </Route>
           </Route>
         </Route>
@@ -66,6 +74,8 @@ export function AppRouter() {
             <Route path="configurar-menu" element={<ConfigurarMenuPage />} />
             <Route path="lojas"           element={<LojasPage />} />
             <Route path="usuarios"        element={<FranchiseUsersPage />} />
+            <Route path="comunicados"     element={<ComunicadosPage />} />
+            <Route path="notificacoes"    element={<NotificacoesPage />} />
           </Route>
         </Route>
 

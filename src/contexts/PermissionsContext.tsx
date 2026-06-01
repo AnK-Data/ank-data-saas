@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { useAuth } from './AuthContext'
 import { PermissionsService } from '../services/permissions.service'
+import { isAnkRole, ANK_ROLES } from '../types'
 
 // ─── Context shape ─────────────────────────────────────────────────────────────
 
@@ -31,11 +32,19 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   const [allowedModules, setAllowedModules] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Papéis que têm acesso irrestrito a todos os módulos do seu painel
-  const isAdmin = profile?.papel === 'ank_admin' || profile?.papel === 'admin_franquia'
+  // Acesso irrestrito: ANK internos + gestores de franquia (inclui admin_franquia legacy)
+  const FULL_ACCESS_PAPEIS = [
+    // ANK internos
+    ...ANK_ROLES,
+    // Gestão ampla de franquia
+    'franqueado', 'sucessor', 'admin_franquia',
+    'funcionario_administrativo_cp',
+    'gerente_canal_loja', 'gerente_canal_vd',
+  ]
+  const isAdmin = FULL_ACCESS_PAPEIS.includes(profile?.papel ?? '')
 
   useEffect(() => {
-    // Admins (ANK e Franquia) não precisam de lookup de permissões — acesso total
+    // Admins não precisam de lookup de permissões — acesso total ao seu painel
     if (!profile || isAdmin) {
       setLoading(false)
       return

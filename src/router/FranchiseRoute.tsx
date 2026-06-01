@@ -3,6 +3,7 @@ import { differenceInDays, parseISO } from 'date-fns'
 import { useAuth } from '../contexts/AuthContext'
 import { useLicense } from '../hooks/useLicense'
 import Spinner from '../components/ui/Spinner'
+import { isAnkRole } from '../types'
 
 /**
  * Guard do painel do franqueado — SEMPRE exige login explícito.
@@ -21,8 +22,8 @@ export function FranchiseRoute() {
   // Perfil ausente
   if (!profile) return <Navigate to="/login" replace />
 
-  // Admin ANK não acessa o painel franqueado
-  if (profile.papel === 'ank_admin') return <Navigate to="/admin-ank" replace />
+  // Usuários ANK não acessam o painel franqueado
+  if (isAnkRole(profile.papel)) return <Navigate to="/admin-ank" replace />
 
   // Aguarda verificação da licença
   if (profile.tenant_id && licenseLoading) return <Spinner fullScreen />

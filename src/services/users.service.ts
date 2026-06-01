@@ -21,11 +21,11 @@ export const UsersService = {
    * Convida um novo usuário via Supabase Auth signUp.
    *
    * Papéis criáveis pelo Admin ROOT:
-   *  - 'ank_admin'      → sem tenant_id (acesso ao Admin ROOT)
-   *  - 'admin_franquia' → com tenant_id obrigatório (acessa o painel franqueado)
+   *  - AnkRole (ank_admin, ank_suporte, etc.) → sem tenant_id (acesso ao painel ANK)
+   *  - 'franqueado' | 'sucessor'              → com tenant_id obrigatório (painel franqueado)
    *
-   * Usuários operacionais (gerente, vendedor, controller) são criados pelo
-   * próprio admin_franquia dentro do painel franqueado — não aqui.
+   * Usuários operacionais (cargos Boticário) são criados pelo
+   * próprio Franqueado dentro do painel da franquia — não aqui.
    */
   invite: async (params: {
     nome: string

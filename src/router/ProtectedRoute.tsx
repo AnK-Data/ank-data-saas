@@ -3,6 +3,7 @@ import { differenceInDays, parseISO } from 'date-fns'
 import { useAuth } from '../contexts/AuthContext'
 import { useLicense } from '../hooks/useLicense'
 import Spinner from '../components/ui/Spinner'
+import { isAnkRole } from '../types'
 
 /**
  * Guard de autenticação — SEMPRE exige login explícito.
@@ -38,8 +39,8 @@ export function ProtectedRoute() {
     )
   }
 
-  // Admin ANK → painel admin
-  if (profile.papel === 'ank_admin') return <Outlet />
+  // Usuários ANK → painel admin (sem verificação de licença)
+  if (isAnkRole(profile.papel)) return <Outlet />
 
   // Franqueado → verifica licença
   if (profile.tenant_id && licenseLoading) return <Spinner fullScreen />

@@ -1,37 +1,60 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { PlusIcon, PencilSquareIcon, BuildingStorefrontIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import { useEffect, useState, useCallback, useRef, type FormEvent } from 'react'
+import * as XLSX from 'xlsx'
+import {
+  PlusIcon, PencilSquareIcon, BuildingStorefrontIcon,
+  ShieldCheckIcon, CloudArrowUpIcon, ArrowUpTrayIcon,
+} from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../contexts/AuthContext'
 import { FranchiseUsersService, type FranchiseUser } from '../../services/franchise-users.service'
 import { LojasService, type Loja } from '../../services/lojas.service'
 import { PermissionsService } from '../../services/permissions.service'
 import type { UserRole } from '../../types'
+import { PAPEL_LABELS, FRANQUEADO_ROLES_LOJA, FRANQUEADO_ROLES_VD, FRANQUEADO_ROLES_ADMIN } from '../../types'
 import Card, { CardHeader } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Modal from '../../components/ui/Modal'
 import Spinner from '../../components/ui/Spinner'
 
-const PAPEL_LABELS: Record<string, string> = {
-  gerente:               'Gerente',
-  vendedor:              'Vendedor',
-  controller_financeiro: 'Controller Financeiro',
+// Cores por grupo de cargo
+const PAPEL_COLORS: Record<string, string> = {
+  // Loja
+  consultor_loja:                  'bg-blue-50 text-blue-700 ring-blue-600/20',
+  gerente_loja:                    'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+  supervisor_loja:                 'bg-teal-50 text-teal-700 ring-teal-600/20',
+  multiplicador_treinamento_loja:  'bg-cyan-50 text-cyan-700 ring-cyan-600/20',
+  gerente_canal_loja:              'bg-indigo-50 text-indigo-700 ring-indigo-600/20',
+  // Venda Direta
+  atendente_vd:                    'bg-pink-50 text-pink-700 ring-pink-600/20',
+  supervisor_campo:                'bg-rose-50 text-rose-700 ring-rose-600/20',
+  gerente_er:                      'bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-600/20',
+  gerente_operacoes_vd:            'bg-purple-50 text-purple-700 ring-purple-600/20',
+  gerente_canal_vd:                'bg-violet-50 text-violet-700 ring-violet-600/20',
+  multiplicador_treinamento_vd:    'bg-pink-50 text-pink-700 ring-pink-600/20',
+  // Admin CP
+  franqueado:                      'bg-amber-50 text-amber-700 ring-amber-600/20',
+  sucessor:                        'bg-orange-50 text-orange-700 ring-orange-600/20',
+  funcionario_administrativo_cp:   'bg-yellow-50 text-yellow-700 ring-yellow-600/20',
+  funcionario_financeiro_cp:       'bg-lime-50 text-lime-700 ring-lime-600/20',
 }
 
-const PAPEL_COLORS: Record<string, string> = {
-  gerente:               'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-  vendedor:              'bg-blue-50 text-blue-700 ring-blue-600/20',
-  controller_financeiro: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-}
+// Cargos disponíveis para cadastro no painel do franqueado (sem logística por ora)
+const CARGOS_DISPONIVEIS: { value: UserRole; label: string; grupo: string }[] = [
+  ...FRANQUEADO_ROLES_LOJA.map(v => ({ value: v as UserRole, label: PAPEL_LABELS[v], grupo: 'Loja' })),
+  ...FRANQUEADO_ROLES_VD.map(v => ({ value: v as UserRole, label: PAPEL_LABELS[v], grupo: 'Venda Direta' })),
+  ...FRANQUEADO_ROLES_ADMIN.map(v => ({ value: v as UserRole, label: PAPEL_LABELS[v], grupo: 'Administrativo' })),
+]
 
 export default function FranchiseUsersPage() {
   const { profile } = useAuth()
   const tenantId = profile?.tenant_id ?? ''
 
-  const [users, setUsers]       = useState<FranchiseUser[]>([])
-  const [loading, setLoading]   = useState(true)
+  const [users, setUsers]           = useState<FranchiseUser[]>([])
+  const [loading, setLoading]       = useState(true)
   const [inviteOpen, setInviteOpen] = useState(false)
-  const [editing, setEditing]   = useState<FranchiseUser | null>(null)
+  const [editing, setEditing]       = useState<FranchiseUser | null>(null)
+  const [ingresseOpen, setIngresseOpen] = useState(false)
 
   async function fetchUsers() {
     if (!tenantId) return
@@ -52,10 +75,17 @@ export default function FranchiseUsersPage() {
             title="Usuários da Franquia"
             subtitle={`${users.length} usuário${users.length !== 1 ? 's' : ''} cadastrado${users.length !== 1 ? 's' : ''}`}
             action={
-              <Button size="sm" leftIcon={<PlusIcon className="h-4 w-4" />}
-                onClick={() => setInviteOpen(true)}>
-                + Novo Usuário
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="secondary" size="sm"
+                  leftIcon={<ArrowUpTrayIcon className="h-4 w-4" />}
+                  onClick={() => setIngresseOpen(true)}>
+                  Upload Lista Ingresse
+                </Button>
+                <Button size="sm" leftIcon={<PlusIcon className="h-4 w-4" />}
+                  onClick={() => setInviteOpen(true)}>
+                  + Novo Usuário
+                </Button>
+              </div>
             }
           />
         </div>
@@ -91,7 +121,14 @@ export default function FranchiseUsersPage() {
                         text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase shrink-0">
                         {user.nome.charAt(0)}
                       </div>
-                      <span className="font-medium text-slate-900 dark:text-slate-100">{user.nome}</span>
+                      <div>
+                        <p className="font-medium text-slate-900 dark:text-slate-100">{user.nome}</p>
+                        {(user as FranchiseUser & { ingresse_id?: string }).ingresse_id && (
+                          <p className="text-[10px] font-mono text-slate-400">
+                            🎫 {(user as FranchiseUser & { ingresse_id?: string }).ingresse_id}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </td>
 
@@ -165,6 +202,13 @@ export default function FranchiseUsersPage() {
           setLoading(true); await fetchUsers()
         }}
       />
+
+      <IngresseUploadModal
+        open={ingresseOpen}
+        tenantId={tenantId}
+        onClose={() => setIngresseOpen(false)}
+        onSaved={async () => { setIngresseOpen(false); setLoading(true); await fetchUsers() }}
+      />
     </>
   )
 }
@@ -188,38 +232,36 @@ function UserModal({ open, initial, tenantId, onClose, onSaved }: {
   open: boolean; initial: FranchiseUser | null; tenantId: string
   onClose: () => void; onSaved: () => void
 }) {
-  const [nome, setNome]         = useState('')
-  const [email, setEmail]       = useState('')
-  const [senha, setSenha]       = useState('')
-  const [papel, setPapel]       = useState<UserRole>('gerente')
-  const [lojas, setLojas]       = useState<Loja[]>([])
-  const [selectedLojas, setSelectedLojas] = useState<string[]>([])
-  const [selectedModulos, setSelectedModulos] = useState<string[]>([])
-  const [modSrc, setModSrc]     = useState<'papel' | 'custom'>('papel')
-  const [saving, setSaving]     = useState(false)
+  const [nome, setNome]           = useState('')
+  const [email, setEmail]         = useState('')
+  const [senha, setSenha]         = useState('')
+  const [ingresseId, setIngresseId] = useState('')
+  const [papel, setPapel]         = useState<UserRole>('consultor_loja')
+  const [lojas, setLojas]         = useState<Loja[]>([])
+  const [selectedLojas, setSelectedLojas]       = useState<string[]>([])
+  const [selectedModulos, setSelectedModulos]   = useState<string[]>([])
+  const [modSrc, setModSrc]       = useState<'papel' | 'custom'>('papel')
+  const [saving, setSaving]       = useState(false)
 
   useEffect(() => {
     if (open) {
-      // Carrega lojas disponíveis
       LojasService.list(tenantId).then(({ data }) => setLojas((data ?? []) as Loja[]))
 
       if (initial) {
         setNome(initial.nome)
         setPapel(initial.papel)
+        setIngresseId((initial as FranchiseUser & { ingresse_id?: string }).ingresse_id ?? '')
         setSelectedLojas((initial.usuario_lojas ?? []).map((ul: { loja_id: string }) => ul.loja_id))
         const mods = (initial.modulos ?? []).map((m: { slug_modulo: string }) => m.slug_modulo)
         setSelectedModulos(mods)
         setModSrc(mods.length > 0 ? 'custom' : 'papel')
       } else {
-        setNome(''); setEmail(''); setSenha(''); setPapel('gerente')
+        setNome(''); setEmail(''); setSenha(''); setIngresseId(''); setPapel('consultor_loja')
         setSelectedLojas([]); setSelectedModulos([]); setModSrc('papel')
       }
 
-      // Carrega módulos padrão do papel selecionado
-      PermissionsService.getSlugsForPapel(initial?.papel ?? 'gerente').then(({ data }) => {
-        if (modSrc === 'papel' && data) {
-          setSelectedModulos(data.map(r => r.slug_modulo))
-        }
+      PermissionsService.getSlugsForPapel(initial?.papel ?? 'consultor_loja').then(({ data }) => {
+        if (modSrc === 'papel' && data) setSelectedModulos(data.map(r => r.slug_modulo))
       })
     }
   }, [open, initial, tenantId])
@@ -286,6 +328,30 @@ function UserModal({ open, initial, tenantId, onClose, onSaved }: {
                   hint="Mínimo 8 caracteres. O usuário poderá alterar após o primeiro acesso." required />
               </>
             )}
+
+            {/* ID Ingresse */}
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                ID Ingresse
+                <span className="ml-2 text-xs text-slate-400 font-normal">(opcional)</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🎫</span>
+                <input
+                  type="text"
+                  value={ingresseId}
+                  onChange={e => setIngresseId(e.target.value)}
+                  placeholder="Ex: ING-12345 ou código do sistema"
+                  className="block w-full rounded-lg border border-slate-300 dark:border-slate-600
+                    bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                    pl-8 pr-3 py-2 text-sm focus:border-ank-400 focus:outline-none focus:ring-2 focus:ring-ank-200"
+                />
+              </div>
+              <p className="text-xs text-slate-400">
+                Código de identificação no sistema Ingresse. Usado para cruzamento de dados.
+              </p>
+            </div>
+
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Função *</label>
               <select value={papel} onChange={e => setPapel(e.target.value as UserRole)}
@@ -382,6 +448,241 @@ function UserModal({ open, initial, tenantId, onClose, onSaved }: {
           )}
         </section>
       </form>
+    </Modal>
+  )
+}
+
+// ─── Modal: Upload Lista Ingresse ─────────────────────────────────────────────
+
+interface IngresseRow {
+  nome: string
+  email: string
+  ingresse_id: string
+  cargo: string
+  pdv?: string
+}
+
+// Colunas esperadas no arquivo Ingresse (case-insensitive, normalizado)
+const INGRESSE_COL_MAP: Record<string, keyof IngresseRow> = {
+  'nome': 'nome', 'name': 'nome',
+  'email': 'email', 'e-mail': 'email',
+  'id': 'ingresse_id', 'codigo': 'ingresse_id', 'ingresse': 'ingresse_id', 'ingresse_id': 'ingresse_id',
+  'cargo': 'cargo', 'funcao': 'cargo', 'função': 'cargo', 'role': 'cargo',
+  'pdv': 'pdv', 'loja': 'pdv', 'cod_pdv': 'pdv', 'codigo_pdv': 'pdv',
+}
+
+function normalizeKey(s: string) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ\s_-]/g, '')
+}
+
+function parseIngresseFile(file: File): Promise<IngresseRow[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = e => {
+      try {
+        const wb  = XLSX.read(e.target?.result, { type: 'array' })
+        const ws  = wb.Sheets[wb.SheetNames[0]]
+        const raw = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: '' })
+
+        if (!raw.length) { resolve([]); return }
+
+        // Mapeia as colunas do arquivo para os campos esperados
+        const headers = Object.keys(raw[0])
+        const colMap: Partial<Record<keyof IngresseRow, string>> = {}
+        headers.forEach(h => {
+          const norm = normalizeKey(h)
+          const field = INGRESSE_COL_MAP[norm]
+          if (field) colMap[field] = h
+        })
+
+        const rows: IngresseRow[] = raw.map(r => ({
+          nome:        String(r[colMap.nome ?? ''] ?? '').trim(),
+          email:       String(r[colMap.email ?? ''] ?? '').trim().toLowerCase(),
+          ingresse_id: String(r[colMap.ingresse_id ?? ''] ?? '').trim(),
+          cargo:       String(r[colMap.cargo ?? ''] ?? '').trim(),
+          pdv:         String(r[colMap.pdv ?? ''] ?? '').trim(),
+        })).filter(r => r.nome && r.email)
+
+        resolve(rows)
+      } catch (err) { reject(err) }
+    }
+    reader.onerror = reject
+    reader.readAsArrayBuffer(file)
+  })
+}
+
+function IngresseUploadModal({ open, tenantId, onClose, onSaved }: {
+  open: boolean; tenantId: string; onClose: () => void; onSaved: () => void
+}) {
+  const [rows, setRows]         = useState<IngresseRow[]>([])
+  const [fileName, setFileName] = useState('')
+  const [isDragging, setIsDragging] = useState(false)
+  const [importing, setImporting]   = useState(false)
+  const [done, setDone]             = useState(false)
+  const [results, setResults]       = useState<{ok: number; err: number}>({ ok: 0, err: 0 })
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (open) { setRows([]); setFileName(''); setDone(false); setResults({ ok: 0, err: 0 }) }
+  }, [open])
+
+  const handleFile = useCallback(async (file: File) => {
+    try {
+      const parsed = await parseIngresseFile(file)
+      setRows(parsed)
+      setFileName(file.name)
+    } catch {
+      toast.error('Erro ao ler o arquivo. Verifique o formato.')
+    }
+  }, [])
+
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault(); setIsDragging(false)
+    const f = e.dataTransfer.files[0]
+    if (f) handleFile(f)
+  }, [handleFile])
+
+  async function handleImport() {
+    if (!rows.length) return
+    setImporting(true)
+    let ok = 0, err = 0
+
+    for (const row of rows) {
+      try {
+        const senha = `Ank@${Math.random().toString(36).slice(2, 10)}`
+        const { error } = await FranchiseUsersService.create({
+          nome:         row.nome,
+          email:        row.email,
+          senha,
+          papel:        'consultor_loja',   // padrão — pode ser editado depois
+          tenant_id:    tenantId,
+          lojaIds:      [],
+          slugModulos:  [],
+          ingresse_id:  row.ingresse_id,
+        })
+        if (error) err++; else ok++
+      } catch { err++ }
+    }
+
+    setResults({ ok, err })
+    setImporting(false)
+    setDone(true)
+
+    if (ok > 0) {
+      toast.success(`${ok} usuário${ok !== 1 ? 's' : ''} importado${ok !== 1 ? 's' : ''} com sucesso!`)
+      onSaved()
+    }
+    if (err > 0) toast.error(`${err} usuário${err !== 1 ? 's' : ''} falharam na importação.`)
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} size="lg" title="Importar Lista do Ingresse"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={importing}>Fechar</Button>
+          {rows.length > 0 && !done && (
+            <Button loading={importing} onClick={handleImport}
+              leftIcon={<CloudArrowUpIcon className="h-4 w-4" />}>
+              Importar {rows.length} usuário{rows.length !== 1 ? 's' : ''}
+            </Button>
+          )}
+        </>
+      }
+    >
+      <div className="space-y-4">
+        {/* Zona de upload */}
+        {rows.length === 0 && (
+          <div
+            onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={onDrop}
+            onClick={() => inputRef.current?.click()}
+            className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed
+              py-12 cursor-pointer transition-all text-center
+              ${isDragging ? 'border-ank-500 bg-ank-50 dark:bg-ank-950/30' : 'border-slate-300 dark:border-slate-700 hover:border-ank-400'}`}
+          >
+            <input ref={inputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = '' }} />
+            <CloudArrowUpIcon className="h-10 w-10 text-slate-400 mb-3" />
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Arraste a lista exportada do Ingresse aqui
+            </p>
+            <p className="text-xs text-slate-400 mt-1">CSV, XLSX ou XLS</p>
+          </div>
+        )}
+
+        {/* Instruções de formato */}
+        {rows.length === 0 && (
+          <div className="rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-3 text-xs text-amber-700 dark:text-amber-400">
+            <p className="font-semibold mb-1">📋 Colunas esperadas no arquivo:</p>
+            <p className="font-mono">Nome · Email · ID (Ingresse ID) · Cargo · PDV (opcional)</p>
+            <p className="mt-1 text-amber-600">Os nomes das colunas podem variar — o sistema detecta automaticamente.</p>
+          </div>
+        )}
+
+        {/* Preview dos dados */}
+        {rows.length > 0 && !done && (
+          <>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {rows.length} usuário{rows.length !== 1 ? 's' : ''} encontrado{rows.length !== 1 ? 's' : ''}
+                </p>
+                <p className="text-xs text-slate-400">{fileName}</p>
+              </div>
+              <button onClick={() => { setRows([]); setFileName('') }}
+                className="text-xs text-red-500 hover:text-red-700 transition-colors">
+                Remover arquivo
+              </button>
+            </div>
+
+            <div className="max-h-64 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700">
+              <table className="w-full text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0">
+                  <tr className="text-left text-slate-500 dark:text-slate-400">
+                    <th className="px-3 py-2">Nome</th>
+                    <th className="px-3 py-2">E-mail</th>
+                    <th className="px-3 py-2">ID Ingresse</th>
+                    <th className="px-3 py-2">Cargo</th>
+                    <th className="px-3 py-2">PDV</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {rows.map((r, i) => (
+                    <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">{r.nome}</td>
+                      <td className="px-3 py-2 text-slate-500">{r.email}</td>
+                      <td className="px-3 py-2 font-mono text-slate-500">{r.ingresse_id || '—'}</td>
+                      <td className="px-3 py-2 text-slate-500">{r.cargo || '—'}</td>
+                      <td className="px-3 py-2 text-slate-500">{r.pdv || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 px-4 py-3 text-xs text-blue-700 dark:text-blue-400">
+              ℹ️ Todos os usuários serão cadastrados com o papel <strong>Consultor de Vendas de Loja</strong> e uma senha temporária aleatória. Você pode editar individualmente após a importação.
+            </div>
+          </>
+        )}
+
+        {/* Resultado */}
+        {done && (
+          <div className="text-center py-6">
+            <p className="text-3xl mb-3">
+              {results.err === 0 ? '✅' : results.ok === 0 ? '❌' : '⚠️'}
+            </p>
+            <p className="text-base font-semibold text-slate-800 dark:text-slate-200">
+              {results.ok} importado{results.ok !== 1 ? 's' : ''} com sucesso
+              {results.err > 0 ? ` · ${results.err} com erro` : ''}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              Usuários com erro já podem existir no sistema ou houve falha na criação.
+            </p>
+          </div>
+        )}
+      </div>
     </Modal>
   )
 }

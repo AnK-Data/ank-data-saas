@@ -5,8 +5,8 @@ import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/
 import { useAuth } from '../../contexts/AuthContext'
 import Button from '../../components/ui/Button'
 import AnkMascot from '../../components/AnkMascot'
-
-const ADMIN_ROLES = ['ank_admin']
+import AnkLogo from '../../components/AnkLogo'
+import { isAnkRole } from '../../types'
 
 export default function LoginPage() {
   const { signIn } = useAuth()
@@ -24,7 +24,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const profile = await signIn(email, password)
-      const dest = profile && ADMIN_ROLES.includes(profile.papel)
+      const dest = profile && isAnkRole(profile.papel)
         ? '/admin-ank'
         : '/franqueado'
       navigate(dest, { replace: true })
@@ -42,7 +42,7 @@ export default function LoginPage() {
       {/* ── Painel esquerdo ─────────────────────────────────────────── */}
       <div
         className="hidden lg:flex lg:w-[58%] relative flex-col items-center justify-center overflow-hidden select-none"
-        style={{ background: 'linear-gradient(135deg, #172554 0%, #1e3a8a 40%, #1d4ed8 100%)' }}
+        style={{ background: 'linear-gradient(145deg, #1e2024 0%, #32343A 50%, #3d4047 100%)' }}
       >
         <div className="absolute inset-0 opacity-[0.07]"
           style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
@@ -50,16 +50,19 @@ export default function LoginPage() {
         <div className="absolute bottom-0 right-0 h-80 w-80 translate-x-1/3 translate-y-1/3 rounded-full bg-cyan-400/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col items-center text-center px-12">
-          <AnkMascot height={260} className="drop-shadow-2xl mb-6" />
-          <h1 className="text-3xl font-black text-white tracking-tight">
-            ANK Data<span className="text-blue-300"> Insights</span>
-          </h1>
-          <p className="mt-2 text-base text-blue-200/70 max-w-xs leading-snug">
+          {/* Logo oficial ANK Data */}
+          <AnkLogo variant="light" height={160} className="mb-8 drop-shadow-2xl" />
+
+          <p className="text-base text-white/50 max-w-xs leading-snug text-center">
             Inteligência de dados para o varejo de cosméticos do Grupo Boticário
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-2">
+
+          {/* Mascote abaixo */}
+          <AnkMascot height={200} className="mt-6 drop-shadow-xl opacity-80" />
+
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
             {['Sell-Out', 'Estoque', 'CRM', 'Financeiro', 'Conformidade', 'IA'].map(m => (
-              <span key={m} className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-blue-200 ring-1 ring-white/10">{m}</span>
+              <span key={m} className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/60 ring-1 ring-white/10">{m}</span>
             ))}
           </div>
         </div>

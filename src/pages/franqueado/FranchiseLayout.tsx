@@ -16,6 +16,8 @@ const PAGE_TITLES: Record<string, string> = {
   '/franqueado/configurar-menu': 'Configurar Menu',
   '/franqueado/lojas':           'Lojas / PDVs',
   '/franqueado/usuarios':        'Usuários da Franquia',
+  '/franqueado/comunicados':     'Comunicados',
+  '/franqueado/notificacoes':    'Notificações',
 }
 
 export default function FranchiseLayout() {

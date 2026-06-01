@@ -1,36 +1,30 @@
 import { useEffect, useRef } from 'react'
-import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline'
-import { format, parseISO } from 'date-fns'
+import { formatDistanceToNow, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-
-export interface Notification {
-  id: string
-  titulo: string
-  corpo: string
-  tipo: 'info' | 'warning' | 'success' | 'update'
-  lida: boolean
-  created_at: string
-  fonte?: string
-}
+import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline'
+import type { Notificacao } from '../../services/notificacoes.service'
 
 const TIPO_ICON: Record<string, string> = {
-  update:  '🚀',
-  info:    'ℹ️',
-  warning: '⚠️',
-  success: '✅',
+  sistema:  '⚡',
+  anuncio:  '🚀',
+  alerta:   '⚠️',
+  info:     'ℹ️',
 }
 
 interface Props {
   open: boolean
   onClose: () => void
-  notifications: Notification[]
+  /** Apenas notificações NÃO LIDAS — ao marcar como lida sai desta lista */
+  notifications: Notificacao[]
   onMarkAllRead: () => void
+  onNotifClick: (n: Notificacao) => void
 }
 
-export default function NotificationPanel({ open, onClose, notifications, onMarkAllRead }: Props) {
+export default function NotificationPanel({
+  open, onClose, notifications, onMarkAllRead, onNotifClick,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null)
 
-  // Fecha ao clicar fora
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose()
@@ -39,8 +33,6 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
     return () => document.removeEventListener('mousedown', handler)
   }, [open, onClose])
 
-  const unread = notifications.filter(n => !n.lida).length
-
   if (!open) return null
 
   return (
@@ -48,28 +40,30 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
       {/* Overlay semitransparente */}
       <div className="fixed inset-0 z-40 bg-black/20 dark:bg-black/40" onClick={onClose} />
 
-      {/* Painel */}
+      {/* Painel deslizante */}
       <div
         ref={ref}
         className="fixed right-0 top-0 z-50 flex h-full w-full max-w-sm flex-col
           bg-white dark:bg-slate-900 shadow-2xl
-          border-l border-slate-200 dark:border-slate-700
-          animate-in slide-in-from-right duration-200"
+          border-l border-slate-200 dark:border-slate-700"
       >
         {/* Header do painel */}
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-5 py-4">
           <div>
             <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Notificações</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              {unread > 0 ? `${unread} não lida${unread !== 1 ? 's' : ''}` : 'Todas lidas'}
+              {notifications.length > 0
+                ? `${notifications.length} não lida${notifications.length !== 1 ? 's' : ''}`
+                : 'Tudo em dia'}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {unread > 0 && (
+            {notifications.length > 0 && (
               <button
                 onClick={onMarkAllRead}
                 className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400
-                  hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+                  hover:text-slate-800 dark:hover:text-slate-200 transition-colors px-2 py-1 rounded-lg
+                  hover:bg-slate-100 dark:hover:bg-slate-800"
                 title="Marcar todas como lidas"
               >
                 <CheckIcon className="h-3.5 w-3.5" />
@@ -96,50 +90,57 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
             </div>
           ) : (
             notifications.map(n => (
-              <div
+              <button
                 key={n.id}
-                className={`flex gap-3.5 px-5 py-4 cursor-pointer transition-colors
-                  hover:bg-slate-50 dark:hover:bg-slate-800/50
-                  ${!n.lida ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}
+                onClick={() => onNotifClick(n)}
+                className="w-full flex gap-3.5 px-5 py-4 text-left
+                  bg-blue-50/40 dark:bg-ank-950/20
+                  hover:bg-blue-50 dark:hover:bg-ank-950/30
+                  transition-colors cursor-pointer"
               >
                 {/* Ícone */}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl
-                  bg-slate-100 dark:bg-slate-800 text-lg mt-0.5">
+                  bg-white dark:bg-slate-800 shadow-sm text-lg mt-0.5">
                   {TIPO_ICON[n.tipo] ?? 'ℹ️'}
                 </div>
 
                 {/* Conteúdo */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm leading-snug ${!n.lida ? 'font-semibold text-slate-900 dark:text-slate-100' : 'font-medium text-slate-700 dark:text-slate-300'}`}>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug">
                     {n.titulo}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
-                    {n.corpo}
-                  </p>
+                  {n.corpo && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                      {n.corpo}
+                    </p>
+                  )}
                   <div className="flex items-center gap-2 mt-1.5">
-                    {n.fonte && (
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{n.fonte}</span>
-                    )}
+                    <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                      ANK Data
+                    </span>
+                    <span className="text-[10px] text-slate-300 dark:text-slate-600">·</span>
                     <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                      · {format(parseISO(n.created_at), "dd/MM 'às' HH:mm", { locale: ptBR })}
+                      {formatDistanceToNow(parseISO(n.created_at), { addSuffix: true, locale: ptBR })}
                     </span>
                   </div>
                 </div>
 
-                {/* Indicador não lido */}
-                {!n.lida && (
-                  <div className="mt-2 h-2 w-2 shrink-0 rounded-full franchise-btn-primary" />
-                )}
-              </div>
+                {/* Bolinha não lida */}
+                <div className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-ank-500 self-start" />
+              </button>
             ))
           )}
         </div>
 
         {/* Rodapé */}
         <div className="border-t border-slate-200 dark:border-slate-700 px-5 py-3">
-          <p className="text-center text-xs text-slate-400 dark:text-slate-500">
+          <button
+            onClick={onClose}
+            className="w-full text-center text-xs text-slate-400 dark:text-slate-500
+              hover:text-ank-600 dark:hover:text-ank-400 transition-colors"
+          >
             ANK Data — Central de Notificações
-          </p>
+          </button>
         </div>
       </div>
     </>

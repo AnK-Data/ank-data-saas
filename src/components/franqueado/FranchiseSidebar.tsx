@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import PerfilModal from './PerfilModal'
 import { clsx } from 'clsx'
 import {
   HomeIcon, CloudArrowUpIcon, ChartBarIcon, CubeIcon,
   BanknotesIcon, UsersIcon, Cog6ToothIcon, Bars3Icon,
   ChevronDownIcon, ChevronRightIcon,
   ArrowRightStartOnRectangleIcon, BuildingStorefrontIcon,
+  MegaphoneIcon, BellIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import { usePermissions } from '../../contexts/PermissionsContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { getMenuPrefs } from '../../lib/menuPrefs'
+import { PAPEL_LABELS } from '../../types'
 
 const BASE_MODULES = [
   { to: '/franqueado',            slug: 'dashboard',  label: 'Dashboard',  icon: HomeIcon,         end: true },
@@ -19,6 +22,12 @@ const BASE_MODULES = [
   { to: '/franqueado/crm',        slug: 'crm',        label: 'CRM',        icon: UsersIcon                 },
   { to: '/franqueado/financeiro', slug: 'financeiro', label: 'Financeiro', icon: BanknotesIcon             },
   { to: '/franqueado/upload',     slug: 'upload',     label: 'Upload',     icon: CloudArrowUpIcon          },
+]
+
+// Módulos de atendimento (sempre visíveis para todos os usuários autenticados)
+const ATENDIMENTO_ITEMS = [
+  { to: '/franqueado/comunicados',   label: 'Comunicados',   icon: MegaphoneIcon },
+  { to: '/franqueado/notificacoes',  label: 'Notificações',  icon: BellIcon      },
 ]
 
 const CONFIG_ITEMS = [
@@ -63,7 +72,12 @@ export default function FranchiseSidebar() {
     return () => window.removeEventListener('ank:menu-prefs-updated', refresh)
   }, [refresh])
 
-  const isAdmin = profile?.papel === 'admin_franquia'
+  // Papéis com acesso à seção Sistema (Configuração, Lojas, Usuários)
+  // Inclui 'admin_franquia' para retrocompatibilidade com registros antigos no banco
+  const ADMIN_PAPEIS = ['franqueado', 'sucessor', 'admin_franquia',
+    'gerente_canal_loja', 'gerente_canal_vd', 'funcionario_administrativo_cp']
+  const isAdmin = ADMIN_PAPEIS.includes(profile?.papel ?? '')
+  const [perfilOpen, setPerfilOpen] = useState(false)
 
   async function handleSignOut() {
     try { await signOut(); navigate('/login', { replace: true }) }
@@ -94,6 +108,22 @@ export default function FranchiseSidebar() {
             {modules.map(({ to, label, icon: Icon, end }) => (
               <li key={to}>
                 <NavLink to={to} end={end}
+                  className={({ isActive }) => clsx(navBase, isActive ? navActive : navInactive)}>
+                  <Icon className="h-5 w-5 shrink-0" />
+                  {label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Atendimento — visível para todos */}
+        <div>
+          <p className={sectionLabel}>Atendimento</p>
+          <ul className="space-y-0.5">
+            {ATENDIMENTO_ITEMS.map(({ to, label, icon: Icon }) => (
+              <li key={to}>
+                <NavLink to={to}
                   className={({ isActive }) => clsx(navBase, isActive ? navActive : navInactive)}>
                   <Icon className="h-5 w-5 shrink-0" />
                   {label}
@@ -144,36 +174,45 @@ export default function FranchiseSidebar() {
       {/* ── Rodapé: usuário + sair ─────────────────────────────────── */}
       <div className="border-t border-slate-200 dark:border-slate-700 px-4 py-3">
         <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full
-            bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-400
-            font-semibold text-sm uppercase select-none">
-            {(profile?.nome ?? 'F').charAt(0)}
-          </div>
+          {/* Avatar clicável */}
+          <button onClick={() => setPerfilOpen(true)}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full
+              overflow-hidden ring-2 ring-slate-200 dark:ring-slate-700 hover:ring-ank-400
+              transition-all cursor-pointer"
+            title="Editar perfil"
+          >
+            {(profile as { avatar_url?: string } | null)?.avatar_url
+              ? <img src={(profile as { avatar_url?: string }).avatar_url}
+                  alt="Avatar" className="h-full w-full object-cover" />
+              : <div className="h-full w-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center
+                  text-sm font-semibold text-violet-700 dark:text-violet-400 uppercase">
+                  {(profile?.nome ?? 'F').charAt(0)}
+                </div>
+            }
+          </button>
 
-          {/* Nome */}
-          <div className="flex-1 min-w-0">
+          {/* Nome clicável */}
+          <button onClick={() => setPerfilOpen(true)}
+            className="flex-1 min-w-0 text-left hover:opacity-80 transition-opacity">
             <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
               {profile?.nome ?? '—'}
             </p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
-              {profile?.papel === 'admin_franquia' ? 'Admin Franquia'
-                : profile?.papel === 'gerente' ? 'Gerente'
-                : profile?.papel === 'vendedor' ? 'Vendedor' : 'Controller'}
+              {profile?.papel ? (PAPEL_LABELS[profile.papel] ?? profile.papel) : '—'}
             </p>
-          </div>
+          </button>
 
           {/* Botão sair */}
-          <button
-            onClick={handleSignOut}
-            title="Sair da conta"
+          <button onClick={handleSignOut} title="Sair da conta"
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200
-              hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
+              hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
+
+      {/* Modal de perfil */}
+      <PerfilModal open={perfilOpen} onClose={() => setPerfilOpen(false)} />
     </aside>
   )
 }

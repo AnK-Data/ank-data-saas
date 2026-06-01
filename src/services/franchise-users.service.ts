@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient'
 import type { UserRole } from '../types'
+import { FRANQUEADO_ROLES } from '../types'
 
 export interface FranchiseUser {
   id: string
@@ -12,10 +13,10 @@ export interface FranchiseUser {
   modulos?: { slug_modulo: string }[]
 }
 
-const FRANCHISE_ROLES: UserRole[] = ['gerente', 'vendedor', 'controller_financeiro']
+const FRANCHISE_ROLES: UserRole[] = FRANQUEADO_ROLES
 
 export const FranchiseUsersService = {
-  /** Lista usuários operacionais da franquia (exclui admin_franquia) */
+  /** Lista usuários operacionais da franquia (cargos Boticário) */
   list: (tenantId: string) =>
     supabase
       .from('profiles')
@@ -33,6 +34,7 @@ export const FranchiseUsersService = {
     tenant_id: string
     lojaIds: string[]
     slugModulos: string[]
+    ingresse_id?: string   // Código de identificação no Ingresse
   }) => {
     // 1. Cria conta no Auth
     const { data, error } = await supabase.auth.signUp({
@@ -44,12 +46,15 @@ export const FranchiseUsersService = {
 
     await new Promise(r => setTimeout(r, 800))
 
-    // 2. Atualiza o perfil
-    const { error: pErr } = await supabase.from('profiles').update({
+    // 2. Atualiza o perfil (inclui ingresse_id se fornecido)
+    const profileUpdate: Record<string, unknown> = {
       nome:      params.nome,
       papel:     params.papel,
       tenant_id: params.tenant_id,
-    }).eq('id', data.user.id)
+    }
+    if (params.ingresse_id) profileUpdate.ingresse_id = params.ingresse_id
+
+    const { error: pErr } = await supabase.from('profiles').update(profileUpdate).eq('id', data.user.id)
     if (pErr) return { error: pErr }
 
     // 3. Atribui lojas
