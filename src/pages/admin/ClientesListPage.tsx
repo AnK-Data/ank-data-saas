@@ -73,15 +73,20 @@ export default function ClientesListPage() {
   const [creating, setCreating]     = useState(false)
 
   const fetchClientes = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('tenants')
-      .select(`
-        id, nome_franquia, codigo_cp, plano, mrr, situacao, trial_end,
-        implantacao, score, responsavel, obs, ativo, created_at
-      `)
-      .order('created_at', { ascending: false })
+    // Usa RPC SECURITY DEFINER para bypassar RLS (mesma abordagem de Usuários das Empresas)
+    const { data, error } = await supabase.rpc('get_tenants_for_admin')
 
-    if (!error && data) setClientes(data as Cliente[])
+    if (error) {
+      console.warn('[ClientesLista] RPC error:', error.message)
+      // Fallback: tenta query direta
+      const { data: fallback } = await supabase
+        .from('tenants')
+        .select('*')
+        .order('nome_franquia')
+      if (fallback) setClientes(fallback as Cliente[])
+    } else {
+      setClientes((data ?? []) as Cliente[])
+    }
     setLoading(false)
   }, [])
 

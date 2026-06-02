@@ -58,18 +58,16 @@ export default function UsersPage() {
 
   async function fetchUsers() {
     const { data, error } = await UsersService.list()
-    if (!error && data) setUsers(data as ProfileRow[])
+    if (!error && data) {
+      // Filtra apenas usuários internos da ANK Data
+      setUsers((data as ProfileRow[]).filter(u => isAnkRole(u.papel)))
+    }
     setLoading(false)
   }
 
   useEffect(() => { fetchUsers() }, [])
 
   if (loading) return <Spinner fullScreen />
-
-  // Separação por domínio
-  const ankAdmins     = users.filter(u => isAnkRole(u.papel))
-  const franchiseAdmins = users.filter(u => !isAnkRole(u.papel) && (u.papel === 'franqueado' || u.papel === 'sucessor'))
-  const operational   = users.filter(u => !isAnkRole(u.papel) && u.papel !== 'franqueado' && u.papel !== 'sucessor')
 
   return (
     <>
@@ -79,8 +77,8 @@ export default function UsersPage() {
         <Card padding={false}>
           <div className="px-6 py-5 border-b border-slate-100">
             <CardHeader
-              title="Gerenciamento de Usuários"
-              subtitle={`${ankAdmins.length} admin ANK · ${franchiseAdmins.length} admin franquia · ${operational.length} operacional`}
+              title="Usuários ANK Data"
+              subtitle={`${users.length} membro${users.length !== 1 ? 's' : ''} da equipe interna ANK Data`}
               action={
                 <Button size="sm" leftIcon={<PlusIcon className="h-4 w-4" />} onClick={() => setInviteOpen(true)}>
                   + Convidar Usuário
@@ -209,7 +207,7 @@ export default function UsersPage() {
  * próprio Franqueado dentro do painel da franquia — não por aqui.
  */
 
-type InviteType = AnkRole | 'franqueado' | 'sucessor'
+type InviteType = AnkRole
 
 interface InviteOption {
   value: InviteType
@@ -255,21 +253,9 @@ const INVITE_OPTIONS: InviteOption[] = [
     badge:            ROLE_CONFIG.ank_tech.badge,
     requiresFranquia: false,
   },
-  {
-    value:            'franqueado',
-    label:            PAPEL_LABELS['franqueado'],
-    description:      'Franqueado master — visão comercial completa da franquia.',
-    badge:            'bg-amber-100 text-amber-800 ring-amber-400/30',
-    requiresFranquia: true,
-  },
-  {
-    value:            'sucessor',
-    label:            PAPEL_LABELS['sucessor'],
-    description:      'Sucessor do franqueado — mesma visão comercial.',
-    badge:            'bg-orange-100 text-orange-800 ring-orange-400/30',
-    requiresFranquia: true,
-  },
 ]
+
+// Nota: franqueado/sucessor são convidados pela página "Admins das Empresas"
 
 function InviteModal({ open, onClose, onSaved }: {
   open: boolean
@@ -277,7 +263,7 @@ function InviteModal({ open, onClose, onSaved }: {
   onSaved: () => void
 }) {
   const [tenants, setTenants]       = useState<Pick<Tenant, 'id' | 'nome_franquia'>[]>([])
-  const [tipo, setTipo]             = useState<InviteType>('franqueado')
+  const [tipo, setTipo]             = useState<InviteType>('ank_admin')
   const [nome, setNome]             = useState('')
   const [email, setEmail]           = useState('')
   const [senha, setSenha]           = useState('')
@@ -291,16 +277,13 @@ function InviteModal({ open, onClose, onSaved }: {
       TenantsService.listActive().then(({ data }) =>
         setTenants((data ?? []) as Pick<Tenant, 'id' | 'nome_franquia'>[])
       )
-      setNome(''); setEmail(''); setSenha(''); setTenantId(''); setTipo('franqueado')
+      setNome(''); setEmail(''); setSenha(''); setTenantId(''); setTipo('ank_admin')
     }
   }, [open])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (selected.requiresFranquia && !tenantId) {
-      toast.error('Selecione a franquia para este usuário.')
-      return
-    }
+    // Todos os papéis ANK não requerem franquia
     if (senha.length < 8) { toast.error('Senha deve ter ao menos 8 caracteres.'); return }
 
     setSaving(true)
@@ -309,11 +292,11 @@ function InviteModal({ open, onClose, onSaved }: {
         nome,
         email,
         senha,
-        tenant_id: selected.requiresFranquia ? tenantId : '',
+        tenant_id: '',  // usuários ANK não têm franquia
         papel:     tipo as UserRole,
       })
       if (error) throw error
-      toast.success(`${selected.label} convidado com sucesso! Um e-mail de confirmação foi enviado.`)
+      toast.success(`Usuário convidado com sucesso! Um e-mail de confirmação foi enviado.`)
       onSaved()
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao convidar usuário.')
@@ -381,30 +364,7 @@ function InviteModal({ open, onClose, onSaved }: {
           placeholder="Mínimo 8 caracteres" required
           hint="O usuário poderá alterar após o primeiro acesso." />
 
-        {/* ── Seleção de franquia (apenas Admin Franquia) ─────────────── */}
-        {selected.requiresFranquia && (
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-slate-700">
-              Franquia *
-              <span className="ml-1 text-xs text-violet-600 font-normal">(obrigatório para Admin Franquia)</span>
-            </label>
-            <select
-              value={tenantId}
-              onChange={e => setTenantId(e.target.value)}
-              required
-              className="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm
-                focus:border-ank-400 focus:outline-none focus:ring-2 focus:ring-ank-200"
-            >
-              <option value="">Selecione a franquia…</option>
-              {tenants.map(t => (
-                <option key={t.id} value={t.id}>{t.nome_franquia}</option>
-              ))}
-            </select>
-            <p className="text-xs text-slate-500">
-              Este usuário gerenciará os demais membros desta franquia.
-            </p>
-          </div>
-        )}
+        {/* Usuários ANK não têm franquia vinculada */}
 
         {/* ── Aviso informativo ───────────────────────────────────────── */}
         <div className={`rounded-xl px-4 py-3 flex gap-2.5 text-xs

@@ -18,16 +18,17 @@ import { loadAdminColors } from '../../pages/admin/AdminConfigPage'
 
 const BASE_NAV = [
   { to: '/admin-ank',            icon: HomeIcon,               label: 'Dashboard',    slug: 'dashboard',   end: true },
-  { to: '/admin-ank/tenants',    icon: BuildingStorefrontIcon, label: 'Franquias',    slug: 'tenants'              },
   { to: '/admin-ank/licenses',   icon: DocumentCheckIcon,      label: 'Planos',       slug: 'licenses'             },
   { to: '/admin-ank/users',      icon: UsersIcon,              label: 'Usuários',     slug: 'users'                },
   { to: '/admin-ank/compliance', icon: ShieldCheckIcon,        label: 'Conformidade', slug: 'compliance'           },
 ]
+// Franquias (/admin-ank/tenants) foi absorvida pela Lista em Clientes
 
 const CLIENTES_ITEMS = [
   { to: '/admin-ank/clientes',             icon: ListBulletIcon,    label: 'Lista'                   },
   { to: '/admin-ank/clientes/onboarding',  icon: UserGroupIcon,     label: 'Onboarding · Novo cli.'  },
   { to: '/admin-ank/clientes/kanban',      icon: ViewColumnsIcon,   label: 'Onboarding · Kanban'     },
+  { to: '/admin-ank/clientes/admins',      icon: ShieldCheckIcon,   label: 'Usuários das Empresas'   },
   { to: '/admin-ank/clientes/contratos',   icon: DocumentCheckIcon, label: 'Contratos'               },
 ]
 

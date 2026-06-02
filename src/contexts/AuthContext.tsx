@@ -100,6 +100,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data.user)
       loadingRef.current = false
       const p = await loadProfile(data.user.id)
+      // Registra último acesso (fire-and-forget)
+      supabase.from('profiles')
+        .update({ ultimo_acesso: new Date().toISOString() })
+        .eq('id', data.user.id)
+        .then(() => {})
       return p
     }
     return null
