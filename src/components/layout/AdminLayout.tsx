@@ -16,6 +16,7 @@ const pageTitles: Record<string, string> = {
   '/admin-ank/clientes/contratos':      'Contratos',
   '/admin-ank/configuracao':    'Configuração Global',
   '/admin-ank/configurar-menu': 'Organizar Menu',
+  '/admin-ank/produtos':        'Base Mestre de Produtos',
 }
 
 export default function AdminLayout() {

@@ -18,6 +18,7 @@ import UsersPage            from '../pages/admin/UsersPage'
 import CompliancePage       from '../pages/admin/CompliancePage'
 import AdminConfigPage      from '../pages/admin/AdminConfigPage'
 import PlanosCatalogoPage  from '../pages/admin/PlanosCatalogoPage'
+import ProductsPage        from '../pages/admin/ProductsPage'
 import AdminMenuPage        from '../pages/admin/AdminMenuPage'
 import ClientesListPage     from '../pages/admin/ClientesListPage'
 import OnboardingPage       from '../pages/admin/OnboardingPage'
@@ -67,6 +68,7 @@ export function AppRouter() {
               <Route path="compliance"      element={<CompliancePage />} />
               <Route path="configuracao"    element={<AdminConfigPage />} />
               <Route path="configurar-menu" element={<AdminMenuPage />} />
+              <Route path="produtos"        element={<ProductsPage />} />
             </Route>
           </Route>
         </Route>

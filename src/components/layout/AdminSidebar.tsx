@@ -6,7 +6,7 @@ import {
   HomeIcon, BuildingStorefrontIcon, DocumentCheckIcon,
   ShieldCheckIcon, UsersIcon, Cog6ToothIcon, Bars3Icon,
   ChevronDownIcon, ChevronRightIcon, ArrowRightStartOnRectangleIcon,
-  UserGroupIcon, ListBulletIcon, ViewColumnsIcon,
+  UserGroupIcon, ListBulletIcon, ViewColumnsIcon, ArchiveBoxIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import AnkLogo from '../AnkLogo'
@@ -47,8 +47,9 @@ function buildNavItems() {
 }
 
 const CONFIG_ITEMS = [
-  { to: '/admin-ank/configuracao',   icon: Cog6ToothIcon, label: 'Configuração Global' },
-  { to: '/admin-ank/configurar-menu', icon: Bars3Icon,    label: 'Organizar Menu'      },
+  { to: '/admin-ank/configuracao',    icon: Cog6ToothIcon,  label: 'Configuração Global' },
+  { to: '/admin-ank/configurar-menu', icon: Bars3Icon,      label: 'Organizar Menu'      },
+  { to: '/admin-ank/produtos',        icon: ArchiveBoxIcon, label: 'Produtos'            },
 ]
 
 // ─── Estilos ──────────────────────────────────────────────────────────────────
