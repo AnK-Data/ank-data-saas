@@ -13,7 +13,6 @@ import {
   EVENTOS_PADRAO,
 } from '../../services/notificacoes.service'
 import Spinner from '../../components/ui/Spinner'
-import Button from '../../components/ui/Button'
 
 // ─── Config visual por tipo ───────────────────────────────────────────────────
 

@@ -3,7 +3,7 @@ import type { TenantCompliance, UploadLog } from '../types'
 
 export const ComplianceService = {
   check: () =>
-    supabase.rpc('check_tenant_compliance') as Promise<{
+    supabase.rpc('check_tenant_compliance') as unknown as Promise<{
       data: TenantCompliance[] | null
       error: unknown
     }>,

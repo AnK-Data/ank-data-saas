@@ -2,12 +2,12 @@ import { ChartBarIcon } from '@heroicons/react/24/outline'
 import { Link } from 'react-router-dom'
 
 export default function VendasPage() {
-  return <ModulePlaceholder emoji="📊" title="Análise de Vendas" slug="vendas"
+  return <ModulePlaceholder emoji="📊" title="Análise de Vendas"
     description="Visualize Sell-Out, giro de estoque, performance por vendedor e alertas de ruptura gerados por IA após o upload do arquivo de vendas." />
 }
 
-function ModulePlaceholder({ emoji, title, description, slug }: {
-  emoji: string; title: string; description: string; slug: string
+function ModulePlaceholder({ emoji, title, description }: {
+  emoji: string; title: string; description: string
 }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">

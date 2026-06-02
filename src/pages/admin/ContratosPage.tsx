@@ -569,7 +569,7 @@ function NovoContratoModal({ templates, userId, onClose, onSaved }: {
   )
 }
 
-function NovoTemplateModal({ userId, onClose, onSaved }: {
+function NovoTemplateModal({ userId: _userId, onClose, onSaved }: {
   userId: string; onClose: () => void; onSaved: () => void
 }) {
   const [titulo,    setTitulo]    = useState('')

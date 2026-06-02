@@ -7,7 +7,6 @@ import { ComplianceService } from '../../services/compliance.service'
 import { TenantsService } from '../../services/tenants.service'
 import Card, { CardHeader } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
-import { ComplianceBadge } from '../../components/ui/Badge'
 import Spinner from '../../components/ui/Spinner'
 import type { TenantCompliance, UploadLog, Tenant } from '../../types'
 

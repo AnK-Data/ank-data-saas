@@ -1,7 +1,6 @@
 import { useState, useCallback, type FormEvent } from 'react'
 import { Cog8ToothIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
-import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import { useTheme } from '../../contexts/ThemeContext'
 

@@ -4,7 +4,8 @@ import toast from 'react-hot-toast'
 import { useAuth } from '../../contexts/AuthContext'
 import { parseXlsxFile, mapRowToProduct, saveImportRecord } from '../../services/productImportService'
 import { truncateProducts, bulkInsertProducts } from '../../services/productsService'
-import type { XlsxRawRow, ParseResult } from '../../services/productImportService'
+import type { XlsxRawRow } from '../../types/productImport'
+import type { ParseResult } from '../../services/productImportService'
 import { REQUIRED_COLUMNS } from '../../types/productImport'
 
 interface Props { onImportComplete: () => void }

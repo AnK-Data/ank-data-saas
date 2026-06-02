@@ -32,7 +32,7 @@ export interface ComunicadoCreate {
 
 export const ComunicadosService = {
   /** Lista comunicados do tenant com info de leitura do usuário atual */
-  list: (tenantId: string, userId: string) =>
+  list: (tenantId: string, _userId?: string) =>
     supabase
       .from('comunicados')
       .select(`
@@ -65,7 +65,7 @@ export const ComunicadosService = {
     }),
 
   /** Verifica quais foram lidos pelo usuário */
-  getLidos: (tenantId: string, userId: string) =>
+  getLidos: (_tenantId: string, userId: string) =>
     supabase
       .from('comunicados_leitura')
       .select('comunicado_id')

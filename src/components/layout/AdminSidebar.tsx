@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { useTheme } from '../../contexts/ThemeContext'
 import {
-  HomeIcon, BuildingStorefrontIcon, DocumentCheckIcon,
+  HomeIcon, DocumentCheckIcon,
   ShieldCheckIcon, UsersIcon, Cog6ToothIcon, Bars3Icon,
   ChevronDownIcon, ChevronRightIcon, ArrowRightStartOnRectangleIcon,
   UserGroupIcon, ListBulletIcon, ViewColumnsIcon, ArchiveBoxIcon,
@@ -54,11 +54,8 @@ const CONFIG_ITEMS = [
 
 // ─── Estilos ──────────────────────────────────────────────────────────────────
 
-const navBase     = 'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors'
-const navInactive = 'text-white/70 hover:bg-white/10 hover:text-white'
-const subBase     = 'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors'
-const subInactive = 'text-white/60 hover:bg-white/10 hover:text-white'
-const subActive   = 'text-white'
+const navBase = 'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors'
+const subBase = 'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors'
 
 export default function AdminSidebar() {
   const { profile, signOut } = useAuth()

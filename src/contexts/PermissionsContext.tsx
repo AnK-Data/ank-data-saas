@@ -8,7 +8,7 @@ import {
 } from 'react'
 import { useAuth } from './AuthContext'
 import { PermissionsService } from '../services/permissions.service'
-import { isAnkRole, ANK_ROLES } from '../types'
+import { ANK_ROLES } from '../types'
 
 // ─── Context shape ─────────────────────────────────────────────────────────────
 

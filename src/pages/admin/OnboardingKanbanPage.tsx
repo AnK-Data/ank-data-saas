@@ -268,7 +268,7 @@ export default function OnboardingKanbanPage() {
 
 // ─── Card do Kanban ───────────────────────────────────────────────────────────
 
-function KanbanCardComponent({ card, stageColor, onDragStart, onDragEnd, onUpdateImplantacao, isDragging }: {
+function KanbanCardComponent({ card, stageColor: _stageColor, onDragStart, onDragEnd, onUpdateImplantacao, isDragging }: {
   card: KanbanCard
   stageColor: string
   onDragStart: () => void

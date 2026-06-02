@@ -362,7 +362,7 @@ function ColorPicker({
 }
 
 function ThemeSwitcher() {
-  const { theme, toggleTheme, isDark } = useTheme()
+  const { theme, toggleTheme } = useTheme()
 
   return (
     <div>

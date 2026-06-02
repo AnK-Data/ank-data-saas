@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { format, parseISO, differenceInDays } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { parseISO, differenceInDays } from 'date-fns'
 import {
   MagnifyingGlassIcon, TableCellsIcon, ViewColumnsIcon,
   ArrowPathIcon, PencilSquareIcon, ArrowTopRightOnSquareIcon,
@@ -56,8 +55,6 @@ export const SITUACAO_CONFIG: Record<Situacao, { label: string; badge: string }>
   cancelado: { label: 'Cancelado',  badge: 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/30 dark:text-red-400'                  },
   suspenso:  { label: 'Suspenso',   badge: 'bg-slate-100 text-slate-600 ring-slate-300 dark:bg-slate-800 dark:text-slate-400'           },
 }
-
-const PLANOS = ['Starter', 'Essencial', 'Pro', 'Enterprise']
 
 type FiltroSituacao = 'todos' | Situacao
 

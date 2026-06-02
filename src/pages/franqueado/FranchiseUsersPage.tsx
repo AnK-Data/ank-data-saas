@@ -10,7 +10,7 @@ import { FranchiseUsersService, type FranchiseUser } from '../../services/franch
 import { LojasService, type Loja } from '../../services/lojas.service'
 import { PermissionsService } from '../../services/permissions.service'
 import type { UserRole } from '../../types'
-import { PAPEL_LABELS, FRANQUEADO_ROLES_LOJA, FRANQUEADO_ROLES_VD, FRANQUEADO_ROLES_ADMIN } from '../../types'
+import { PAPEL_LABELS } from '../../types'
 import Card, { CardHeader } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -39,12 +39,6 @@ const PAPEL_COLORS: Record<string, string> = {
   funcionario_financeiro_cp:       'bg-lime-50 text-lime-700 ring-lime-600/20',
 }
 
-// Cargos disponíveis para cadastro no painel do franqueado (sem logística por ora)
-const CARGOS_DISPONIVEIS: { value: UserRole; label: string; grupo: string }[] = [
-  ...FRANQUEADO_ROLES_LOJA.map(v => ({ value: v as UserRole, label: PAPEL_LABELS[v], grupo: 'Loja' })),
-  ...FRANQUEADO_ROLES_VD.map(v => ({ value: v as UserRole, label: PAPEL_LABELS[v], grupo: 'Venda Direta' })),
-  ...FRANQUEADO_ROLES_ADMIN.map(v => ({ value: v as UserRole, label: PAPEL_LABELS[v], grupo: 'Administrativo' })),
-]
 
 export default function FranchiseUsersPage() {
   const { profile } = useAuth()
@@ -142,9 +136,9 @@ export default function FranchiseUsersPage() {
 
                   {/* Lojas */}
                   <td className="px-6 py-4">
-                    {user.usuario_lojas && user.usuario_lojas.length > 0 ? (
+                    {user.lojas && user.lojas.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
-                        {user.usuario_lojas.map((ul: { loja_id: string; loja: { id: string; nome: string } }) => (
+                        {user.lojas.map((ul: { loja_id: string; loja: { id: string; nome: string } }) => (
                           <span key={ul.loja_id}
                             className="inline-flex items-center gap-1 text-xs bg-violet-50 dark:bg-violet-950/30
                               text-violet-700 dark:text-violet-400 rounded-full px-2 py-0.5">
@@ -251,7 +245,7 @@ function UserModal({ open, initial, tenantId, onClose, onSaved }: {
         setNome(initial.nome)
         setPapel(initial.papel)
         setIngresseId((initial as FranchiseUser & { ingresse_id?: string }).ingresse_id ?? '')
-        setSelectedLojas((initial.usuario_lojas ?? []).map((ul: { loja_id: string }) => ul.loja_id))
+        setSelectedLojas((initial.lojas ?? []).map((ul: { loja_id: string }) => ul.loja_id))
         const mods = (initial.modulos ?? []).map((m: { slug_modulo: string }) => m.slug_modulo)
         setSelectedModulos(mods)
         setModSrc(mods.length > 0 ? 'custom' : 'papel')

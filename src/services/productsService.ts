@@ -61,7 +61,7 @@ export async function getFilterOptions(): Promise<ProductFilterOptions> {
       .select(column)
       .not(column, 'is', null)
       .order(column)
-    const unique = [...new Set((data ?? []).map((r: Record<string, string>) => r[column]).filter(Boolean))]
+    const unique = [...new Set((data ?? []).map((r: unknown) => (r as Record<string, string>)[column]).filter(Boolean))]
     return unique as string[]
   }
 

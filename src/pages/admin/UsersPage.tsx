@@ -262,22 +262,15 @@ function InviteModal({ open, onClose, onSaved }: {
   onClose: () => void
   onSaved: () => void
 }) {
-  const [tenants, setTenants]       = useState<Pick<Tenant, 'id' | 'nome_franquia'>[]>([])
-  const [tipo, setTipo]             = useState<InviteType>('ank_admin')
-  const [nome, setNome]             = useState('')
-  const [email, setEmail]           = useState('')
-  const [senha, setSenha]           = useState('')
-  const [tenantId, setTenantId]     = useState('')
-  const [saving, setSaving]         = useState(false)
-
-  const selected = INVITE_OPTIONS.find(o => o.value === tipo)!
+  const [tipo, setTipo]   = useState<InviteType>('ank_admin')
+  const [nome, setNome]   = useState('')
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (open) {
-      TenantsService.listActive().then(({ data }) =>
-        setTenants((data ?? []) as Pick<Tenant, 'id' | 'nome_franquia'>[])
-      )
-      setNome(''); setEmail(''); setSenha(''); setTenantId(''); setTipo('ank_admin')
+      setNome(''); setEmail(''); setSenha(''); setTipo('ank_admin')
     }
   }, [open])
 
@@ -334,7 +327,7 @@ function InviteModal({ open, onClose, onSaved }: {
                   name="tipo"
                   value={opt.value}
                   checked={tipo === opt.value}
-                  onChange={() => { setTipo(opt.value); setTenantId('') }}
+                  onChange={() => { setTipo(opt.value) }}
                   className="mt-0.5 accent-ank-600"
                 />
                 <div className="flex-1">

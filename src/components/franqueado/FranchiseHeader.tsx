@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BellIcon, MoonIcon, SunIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { BellIcon, MoonIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { format, parseISO, formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useTheme } from '../../contexts/ThemeContext'

@@ -80,7 +80,7 @@ export default function UploadPage() {
       .eq('tenant_id', tenantId)
       .order('data_upload', { ascending: false })
       .limit(100)
-    setHistory((data ?? []) as UploadRecord[])
+    setHistory((data ?? []) as unknown as UploadRecord[])
     setLoadingHistory(false)
   }
 

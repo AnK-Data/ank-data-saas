@@ -255,7 +255,7 @@ function LojaModal({ open, initial, tenantId, onClose, onSaved }: {
     e.preventDefault()
     setSaving(true)
     try {
-      const payload = { ...form, canal: canaisParaCanalLoja(canais), estado: form.estado.toUpperCase().slice(0, 2) }
+      const payload = { ...form, canal: canaisParaCanalLoja(canais), estado: (form.estado ?? '').toUpperCase().slice(0, 2) }
       const { error } = initial
         ? await LojasService.update(initial.id, payload)
         : await LojasService.create(tenantId, payload)

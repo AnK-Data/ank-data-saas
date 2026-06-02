@@ -42,14 +42,6 @@ const GRUPOS_ROLES = [
   },
 ]
 
-// Todos os papéis vinculados a franquias — inclui papéis legados
-const TODOS_PAPEIS_FRANQUIA: string[] = [
-  'franqueado', 'sucessor', 'admin_franquia', // legados / padrão
-  ...FRANQUEADO_ROLES_LOJA,
-  ...FRANQUEADO_ROLES_VD,
-  ...FRANQUEADO_ROLES_ADMIN,
-  ...FRANQUEADO_ROLES_LOGISTICA,
-]
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -139,10 +131,6 @@ export default function AdminsEmpresasPage() {
     return [...set].sort()
   }, [usuarios])
 
-  const situacoesOpts = useMemo(() => {
-    const set = new Set(usuarios.map(u => u.tenant?.situacao).filter(Boolean) as string[])
-    return [...set]
-  }, [usuarios])
 
   const hasFilters = search || filtroEmpresa || filtroCargo || filtroSituacao || filtroIngresse
 

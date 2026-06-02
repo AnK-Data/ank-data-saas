@@ -4,7 +4,7 @@ import { ptBR } from 'date-fns/locale'
 import {
   PlusIcon, MegaphoneIcon, CheckCircleIcon,
   ExclamationTriangleIcon, InformationCircleIcon,
-  EyeIcon, TrashIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../contexts/AuthContext'

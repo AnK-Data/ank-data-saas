@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { format, parseISO, differenceInDays, formatDistanceToNow } from 'date-fns'
+import { format, parseISO, differenceInDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { BellIcon, MoonIcon, SunIcon, XMarkIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { supabase } from '../../lib/supabaseClient'
@@ -44,10 +44,12 @@ export default function AdminHeader({ pageTitle }: { pageTitle: string }) {
     const newAlerts: AdminAlert[] = []
 
     // Alertas de licença
-    ;(licenses ?? []).forEach((lic: { id: string; data_fim_ciclo: string; tenant?: { nome_franquia: string } }) => {
+    ;(licenses ?? []).forEach((licRaw: unknown) => {
+      const lic = licRaw as { id: string; data_fim_ciclo: string; tenant?: { nome_franquia: string } | { nome_franquia: string }[] | null }
       const dias = differenceInDays(parseISO(lic.data_fim_ciclo), now)
       if (dias <= 30 && dias >= 0) {
-        const tenant = lic.tenant?.nome_franquia ?? 'Franquia'
+        const tenantObj = Array.isArray(lic.tenant) ? lic.tenant[0] : lic.tenant
+        const tenant = tenantObj?.nome_franquia ?? 'Franquia'
         newAlerts.push({
           id:         `lic-${lic.id}`,
           tipo:       'licenca',
