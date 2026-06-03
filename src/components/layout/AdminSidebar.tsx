@@ -7,6 +7,7 @@ import {
   ShieldCheckIcon, UsersIcon, Cog6ToothIcon, Bars3Icon,
   ChevronDownIcon, ChevronRightIcon, ArrowRightStartOnRectangleIcon,
   UserGroupIcon, ListBulletIcon, ViewColumnsIcon, ArchiveBoxIcon,
+  MegaphoneIcon, BellAlertIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import AnkLogo from '../AnkLogo'
@@ -178,6 +179,27 @@ export default function AdminSidebar() {
                   style={({ isActive }) => isActive ? { backgroundColor: 'var(--admin-primary, #5086C6)' } : {}}>
                   <Icon className="h-5 w-5 shrink-0" />
                   {label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Atendimento */}
+        <div>
+          <p className={`mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest ${textMuted}`}>
+            Atendimento
+          </p>
+          <ul className="space-y-0.5">
+            {[
+              { to: '/admin-ank/comunicados',   icon: MegaphoneIcon,  label: 'Comunicados'   },
+              { to: '/admin-ank/notificacoes',  icon: BellAlertIcon,  label: 'Notificações'  },
+            ].map(({ to, icon: Icon, label }) => (
+              <li key={to}>
+                <NavLink to={to}
+                  className={({ isActive }) => clsx(navBase, isActive ? 'text-white' : `${textBase} ${textHover}`)}
+                  style={({ isActive }) => isActive ? { backgroundColor: 'var(--admin-primary, #5086C6)' } : {}}>
+                  <Icon className="h-5 w-5 shrink-0" />{label}
                 </NavLink>
               </li>
             ))}

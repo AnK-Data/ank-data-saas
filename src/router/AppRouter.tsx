@@ -19,8 +19,10 @@ import LicensesPage         from '../pages/admin/LicensesPage'
 import UsersPage            from '../pages/admin/UsersPage'
 import CompliancePage       from '../pages/admin/CompliancePage'
 import AdminConfigPage      from '../pages/admin/AdminConfigPage'
-import PlanosCatalogoPage  from '../pages/admin/PlanosCatalogoPage'
-import ProductsPage        from '../pages/admin/ProductsPage'
+import PlanosCatalogoPage       from '../pages/admin/PlanosCatalogoPage'
+import ProductsPage             from '../pages/admin/ProductsPage'
+import AdminComunicadosPage     from '../pages/admin/AdminComunicadosPage'
+import AdminNotificacoesPage    from '../pages/admin/AdminNotificacoesPage'
 import AdminMenuPage        from '../pages/admin/AdminMenuPage'
 import ClientesListPage     from '../pages/admin/ClientesListPage'
 import OnboardingPage       from '../pages/admin/OnboardingPage'
@@ -73,6 +75,8 @@ export function AppRouter() {
               <Route path="configuracao"    element={<AdminConfigPage />} />
               <Route path="configurar-menu" element={<AdminMenuPage />} />
               <Route path="produtos"        element={<ProductsPage />} />
+              <Route path="comunicados"     element={<AdminComunicadosPage />} />
+              <Route path="notificacoes"    element={<AdminNotificacoesPage />} />
             </Route>
           </Route>
         </Route>
