@@ -10,19 +10,36 @@ import {
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabaseClient'
 import type { Profile } from '../types'
+import { getAuthByIngresseId } from '../services/ingresse.service'
+
+// ─── Tipos exportados ─────────────────────────────────────────────────────────
+
+export type LoginMode = 'email' | 'ingresse'
+
+export interface SignInResult {
+  profile: Profile | null
+  /** true = usuário nunca definiu senha → redirecionar para /primeiro-acesso */
+  firstAccess: boolean
+  /** true = conta bloqueada (status Inativo) */
+  blocked: boolean
+}
 
 interface AuthContextValue {
   user: User | null
   profile: Profile | null
-  /** True enquanto o perfil está sendo buscado após o signIn */
   profileLoading: boolean
-  signIn: (email: string, password: string) => Promise<Profile | null>
+  /** Login por e-mail (ANK Data / Prestadores) */
+  signIn: (email: string, password: string) => Promise<SignInResult>
+  /** Login por Ingresse ID (colaboradores de franquia) */
+  signInIngresse: (ingresseId: string, password: string) => Promise<SignInResult>
   signUp: (email: string, password: string, fullName: string) => Promise<void>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function fetchProfileWithTimeout(userId: string): Promise<Profile | null> {
   const query = supabase
@@ -38,9 +55,10 @@ async function fetchProfileWithTimeout(userId: string): Promise<Profile | null> 
   const timeout = new Promise<null>(resolve =>
     setTimeout(() => { console.warn('[Auth] fetchProfile timeout'); resolve(null) }, 10_000)
   )
-
   return Promise.race([query, timeout])
 }
+
+// ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]                     = useState<User | null>(null)
@@ -67,47 +85,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, loadProfile])
 
   useEffect(() => {
-    /*
-     * Escuta mudanças de autenticação (logout, token refresh).
-     * NÃO restaura sessão automaticamente — o usuário deve sempre fazer login.
-     * O SIGNED_OUT limpa o estado local.
-     */
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('[Auth]', event)
-
         if (event === 'SIGNED_OUT' || !session) {
-          setUser(null)
-          setProfile(null)
-          setProfileLoading(false)
-          loadingRef.current = false
+          setUser(null); setProfile(null)
+          setProfileLoading(false); loadingRef.current = false
         }
-        // SIGNED_IN e TOKEN_REFRESHED são tratados pelo signIn() explícito
       },
     )
-
     return () => subscription.unsubscribe()
   }, [])
 
-  /**
-   * Login explícito — único ponto de entrada para autenticação.
-   * Retorna o Profile carregado para redirect inteligente imediato.
-   */
-  async function signIn(email: string, password: string): Promise<Profile | null> {
+  // ─── Login por e-mail (ANK Data / Prestadores) ──────────────────────────────
+
+  async function signIn(email: string, password: string): Promise<SignInResult> {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
-    if (data.user) {
-      setUser(data.user)
-      loadingRef.current = false
-      const p = await loadProfile(data.user.id)
-      // Registra último acesso (fire-and-forget)
-      supabase.from('profiles')
-        .update({ ultimo_acesso: new Date().toISOString() })
-        .eq('id', data.user.id)
-        .then(() => {})
-      return p
+    if (!data.user) return { profile: null, firstAccess: false, blocked: false }
+
+    setUser(data.user)
+    loadingRef.current = false
+    const p = await loadProfile(data.user.id)
+
+    if (p?.status === 'Inativo') {
+      await supabase.auth.signOut()
+      setUser(null); setProfile(null)
+      throw new Error('Usuário inativo. Contate o administrador.')
     }
-    return null
+
+    supabase.from('profiles').update({ ultimo_acesso: new Date().toISOString() })
+      .eq('id', data.user.id).then(() => {})
+
+    return { profile: p, firstAccess: p?.first_access ?? false, blocked: false }
+  }
+
+  // ─── Login por Ingresse ID (colaboradores de franquia) ──────────────────────
+
+  async function signInIngresse(ingresseId: string, password: string): Promise<SignInResult> {
+    // 1. Busca o email interno associado ao Ingresse ID
+    const lookup = await getAuthByIngresseId(ingresseId.trim())
+
+    if (!lookup) {
+      throw new Error('Usuário Ingresse não encontrado. Verifique o ID e tente novamente.')
+    }
+
+    if (lookup.status === 'Inativo') {
+      throw new Error('Usuário inativo. Contate o administrador da franquia.')
+    }
+
+    // 2. Se first_access, não há conta criada ainda → redirecionar
+    if (lookup.first_access) {
+      return { profile: null, firstAccess: true, blocked: false }
+    }
+
+    // 3. Autentica com o email interno
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: lookup.auth_email,
+      password,
+    })
+    if (error) throw new Error('Senha incorreta.')
+
+    if (!data.user) return { profile: null, firstAccess: false, blocked: false }
+
+    setUser(data.user)
+    loadingRef.current = false
+    const p = await loadProfile(data.user.id)
+
+    // Verifica first_access novamente no profile (pode ter sido resetado pelo admin)
+    if (p?.first_access) {
+      return { profile: p, firstAccess: true, blocked: false }
+    }
+
+    supabase.from('profiles').update({ ultimo_acesso: new Date().toISOString() })
+      .eq('id', data.user.id).then(() => {})
+
+    return { profile: p, firstAccess: false, blocked: false }
   }
 
   async function signUp(email: string, password: string, fullName: string) {
@@ -118,17 +170,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
-    setUser(null)
-    setProfile(null)
-    setProfileLoading(false)
-    loadingRef.current = false
+    setUser(null); setProfile(null)
+    setProfileLoading(false); loadingRef.current = false
     await supabase.auth.signOut()
   }
 
   return (
     <AuthContext.Provider value={{
       user, profile, profileLoading,
-      signIn, signUp, signOut, refreshProfile,
+      signIn, signInIngresse, signUp, signOut, refreshProfile,
     }}>
       {children}
     </AuthContext.Provider>

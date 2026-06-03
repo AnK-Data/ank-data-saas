@@ -38,6 +38,8 @@ export default function AnkLogo({
       viewBox={markOnly ? '0 0 200 230' : '0 0 200 280'}
       height={height}
       width={w}
+      style={{ minWidth: w, flexShrink: 0 }}
+      preserveAspectRatio="xMidYMid meet"
       className={className}
       xmlns="http://www.w3.org/2000/svg"
       aria-label="ANK Data"

@@ -4,10 +4,12 @@ import { AdminRoute }    from './AdminRoute'
 import { FranchiseRoute } from './FranchiseRoute'
 
 // Páginas públicas
-import LoginPage      from '../pages/auth/LoginPage'
-import RegisterPage   from '../pages/auth/RegisterPage'
-import LockScreen     from '../pages/LockScreen'
-import UnauthorizedPage from '../pages/UnauthorizedPage'
+import LoginPage          from '../pages/auth/LoginPage'
+import RegisterPage        from '../pages/auth/RegisterPage'
+import PrimeiroAcessoPage  from '../pages/auth/PrimeiroAcessoPage'
+import RedefinirSenhaPage  from '../pages/auth/RedefinirSenhaPage'
+import LockScreen          from '../pages/LockScreen'
+import UnauthorizedPage    from '../pages/UnauthorizedPage'
 
 // Admin ROOT (ANK Data)
 import AdminLayout          from '../components/layout/AdminLayout'
@@ -46,10 +48,12 @@ export function AppRouter() {
     <BrowserRouter>
       <Routes>
         {/* ── Públicas ───────────────────────────────────────────────── */}
-        <Route path="/login"        element={<LoginPage />} />
-        <Route path="/register"     element={<RegisterPage />} />
-        <Route path="/lock"         element={<LockScreen />} />
-        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="/login"           element={<LoginPage />} />
+        <Route path="/register"        element={<RegisterPage />} />
+        <Route path="/primeiro-acesso" element={<PrimeiroAcessoPage />} />
+        <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
+        <Route path="/lock"            element={<LockScreen />} />
+        <Route path="/unauthorized"    element={<UnauthorizedPage />} />
 
         {/* ── Admin ROOT (apenas ank_admin) ──────────────────────────── */}
         <Route element={<ProtectedRoute />}>

@@ -1,29 +1,84 @@
 import { supabase } from '../lib/supabaseClient'
 import type { UserRole } from '../types'
 import { FRANQUEADO_ROLES } from '../types'
+import { padronizarNome, padronizarNomeCurto } from './ingresse.service'
 
+export interface LojaResolvida {
+  id: string | null
+  nome: string | null
+  codigo_pdv: string | null
+}
+
+/** Usuário que vem da função get_franchise_users_full (union de ingresse_colaboradores + profiles) */
 export interface FranchiseUser {
-  id: string
-  nome: string
-  papel: UserRole
-  tenant_id: string | null
-  created_at: string
-  // joins
-  lojas?: { loja_id: string; loja: { id: string; nome: string } }[]
-  modulos?: { slug_modulo: string }[]
+  // Campos Ingresse (sempre presentes)
+  ingresse_id:   string
+  nome:          string
+  nome_curto:    string | null
+  cpf:           string | null
+  cargo:         string | null
+  status:        'Ativo' | 'Inativo'
+  franquia_code: string | null          // código PDV bruto da planilha
+  // Campos de profile (null se não criou conta ainda)
+  profile_id:    string | null
+  papel:         UserRole | null
+  first_access:  boolean | null
+  account_status: 'Ativo' | 'Inativo' | null
+  lojas_json:    LojaResolvida[] | null  // lojas com nomes resolvidos (ProcX)
+  // Aliases
+  id:            string
+  usuario_extranet: string | null
+  cargo_ingresse: string | null
+  tipo_usuario:  'ingresse' | 'manual_ingresse' | 'prestador' | 'ank'
+  tenant_id:     string | null
+  modulos?:      { slug_modulo: string }[]
 }
 
 const FRANCHISE_ROLES: UserRole[] = FRANQUEADO_ROLES
 
 export const FranchiseUsersService = {
-  /** Lista usuários operacionais da franquia (cargos Boticário) */
-  list: (tenantId: string) =>
-    supabase
-      .from('profiles')
-      .select('*, usuario_lojas(loja_id, loja:lojas(id, nome)), permissoes_usuario(slug_modulo)')
-      .eq('tenant_id', tenantId)
-      .in('papel', FRANCHISE_ROLES)
-      .order('nome'),
+  /** Lista todos os colaboradores do tenant (ingresse_colaboradores ∪ profiles) */
+  list: async (tenantId: string) => {
+    const { data, error } = await supabase
+      .rpc('get_franchise_users_full', { p_tenant_id: tenantId })
+
+    if (error) return { data: null, error }
+
+    const users: FranchiseUser[] = (data ?? []).map((row: {
+      ingresse_id: string; nome: string; nome_curto: string | null
+      cpf: string | null; cargo: string | null; status: string
+      franquia_code: string | null; profile_id: string | null
+      papel: string | null; first_access: boolean | null
+      account_status: string | null; lojas_json: LojaResolvida[] | null
+    }) => {
+      // Padroniza no display independente do que está no banco
+      const nomePad  = padronizarNome(row.nome ?? '')
+      const curtoPad = row.nome_curto
+        ? padronizarNomeCurto(padronizarNome(row.nome_curto))
+        : padronizarNomeCurto(nomePad)
+
+      return ({
+      ingresse_id:    row.ingresse_id,
+      nome:           nomePad,
+      nome_curto:     curtoPad || null,
+      cpf:            row.cpf,
+      cargo:          row.cargo,
+      status:         (row.status ?? 'Ativo') as 'Ativo' | 'Inativo',
+      franquia_code:  row.franquia_code,
+      profile_id:     row.profile_id,
+      papel:          (row.papel ?? null) as UserRole | null,
+      first_access:   row.first_access,
+      account_status: (row.account_status ?? null) as 'Ativo' | 'Inativo' | null,
+      lojas_json:     row.lojas_json,
+      id:             row.profile_id ?? row.ingresse_id,
+      usuario_extranet: row.ingresse_id,
+      cargo_ingresse: row.cargo,
+      tipo_usuario:   'ingresse' as const,
+      tenant_id:      tenantId,
+    })}  )
+
+    return { data: users, error: null }
+  },
 
   /** Cria usuário operacional via signUp + atualiza perfil */
   create: async (params: {
@@ -74,18 +129,27 @@ export const FranchiseUsersService = {
     return { error: null }
   },
 
-  /** Atualiza papel, lojas e módulos de um usuário */
+  /** Atualiza papel, lojas, módulos e dados manuais de um usuário */
   update: async (usuarioId: string, params: {
     nome: string
     papel: UserRole
     lojaIds: string[]
     slugModulos: string[]
+    usuario_extranet?: string
+    cpf?: string
+    cargo_ingresse?: string
   }) => {
-    const { error: pErr } = await supabase.from('profiles')
-      .update({ nome: params.nome, papel: params.papel }).eq('id', usuarioId)
+    const profileUpdate: Record<string, unknown> = {
+      nome:  params.nome,
+      papel: params.papel,
+    }
+    if (params.usuario_extranet !== undefined) profileUpdate.usuario_extranet = params.usuario_extranet
+    if (params.cpf !== undefined)             profileUpdate.cpf = params.cpf
+    if (params.cargo_ingresse !== undefined)  profileUpdate.cargo_ingresse = params.cargo_ingresse
+
+    const { error: pErr } = await supabase.from('profiles').update(profileUpdate).eq('id', usuarioId)
     if (pErr) return { error: pErr }
 
-    // Replace lojas
     await supabase.from('usuario_lojas').delete().eq('usuario_id', usuarioId)
     if (params.lojaIds.length > 0) {
       await supabase.from('usuario_lojas').insert(
@@ -93,7 +157,6 @@ export const FranchiseUsersService = {
       )
     }
 
-    // Replace módulos
     await supabase.from('permissoes_usuario').delete().eq('usuario_id', usuarioId)
     if (params.slugModulos.length > 0) {
       await supabase.from('permissoes_usuario').insert(
@@ -102,6 +165,27 @@ export const FranchiseUsersService = {
     }
 
     return { error: null }
+  },
+
+  /** Inativa um usuário manualmente (bloqueia login) */
+  inactivate: async (usuarioId: string) => {
+    const { error } = await supabase.from('profiles')
+      .update({ status: 'Inativo' }).eq('id', usuarioId)
+    return { error }
+  },
+
+  /** Reativa um usuário inativado manualmente */
+  reactivate: async (usuarioId: string) => {
+    const { error } = await supabase.from('profiles')
+      .update({ status: 'Ativo' }).eq('id', usuarioId)
+    return { error }
+  },
+
+  /** Reseta o acesso: obriga usuário a redefinir senha no próximo login */
+  resetAccess: async (usuarioId: string) => {
+    const { error } = await supabase.from('profiles')
+      .update({ first_access: true }).eq('id', usuarioId)
+    return { error }
   },
 
   FRANCHISE_ROLES,

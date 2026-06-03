@@ -199,6 +199,9 @@ export interface License {
   tenant?: Pick<Tenant, 'id' | 'nome_franquia' | 'codigo_cp'>
 }
 
+export type TipoUsuario = 'ingresse' | 'manual_ingresse' | 'prestador' | 'ank'
+export type StatusUsuario = 'Ativo' | 'Inativo'
+
 export interface Profile {
   id: string
   tenant_id: string | null
@@ -208,10 +211,19 @@ export interface Profile {
   dominio: 'ank' | 'franqueado'
   /** Canal de atuação — obrigatório para domínio franqueado */
   canal: Canal | null
-  /** Login no formato Boticário Extranet — identificador de acesso no ANK Data */
+  /** Login Boticário Extranet / Ingresse — identificador único de acesso */
   usuario_extranet: string | null
   cpf: string | null
+  /** 'Ativo' | 'Inativo' — bloqueia login quando Inativo */
+  status: StatusUsuario
+  /** true = usuário ainda não definiu senha; redireciona para /primeiro-acesso */
+  first_access: boolean
+  /** Origem do cadastro */
+  tipo_usuario: TipoUsuario
+  /** Cargo original conforme planilha Ingresse */
+  cargo_ingresse: string | null
   created_at: string
+  ultimo_acesso: string | null
   tenant?: Pick<Tenant, 'id' | 'nome_franquia'>
 }
 
