@@ -50,7 +50,7 @@ export default function LicenseAlertModal() {
         {/* Corpo */}
         <div className="px-6 py-5">
           <p className="text-sm text-slate-700 mb-4">
-            Sua licença da plataforma ANK Data{' '}
+            Sua licença da plataforma AnK Data{' '}
             {isToday
               ? <strong className="text-red-600">vence hoje ({vencimento})</strong>
               : <>vence em <strong className="text-red-600">{dias} dias ({vencimento})</strong></>

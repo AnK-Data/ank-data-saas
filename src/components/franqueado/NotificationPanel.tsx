@@ -116,7 +116,7 @@ export default function NotificationPanel({
                   )}
                   <div className="flex items-center gap-2 mt-1.5">
                     <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
-                      ANK Data
+                      AnK Data
                     </span>
                     <span className="text-[10px] text-slate-300 dark:text-slate-600">·</span>
                     <span className="text-[10px] text-slate-400 dark:text-slate-500">
@@ -139,7 +139,7 @@ export default function NotificationPanel({
             className="w-full text-center text-xs text-slate-400 dark:text-slate-500
               hover:text-ank-600 dark:hover:text-ank-400 transition-colors"
           >
-            ANK Data — Central de Notificações
+            AnK Data — Central de Notificações
           </button>
         </div>
       </div>

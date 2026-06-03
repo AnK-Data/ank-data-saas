@@ -11,7 +11,7 @@ import RedefinirSenhaPage  from '../pages/auth/RedefinirSenhaPage'
 import LockScreen          from '../pages/LockScreen'
 import UnauthorizedPage    from '../pages/UnauthorizedPage'
 
-// Admin ROOT (ANK Data)
+// Admin ROOT (AnK Data)
 import AdminLayout          from '../components/layout/AdminLayout'
 import AdminDashboardPage   from '../pages/admin/AdminDashboardPage'
 import TenantsPage          from '../pages/admin/TenantsPage'

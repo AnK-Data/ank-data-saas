@@ -50,7 +50,7 @@ export default function TenantsPage() {
   return (
     <>
       <Card padding={false}>
-        <div className="px-6 py-5 border-b border-slate-100">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60">
           <CardHeader
             title="Gerenciamento de Franquias"
             subtitle={`${ativas} ativa${ativas !== 1 ? 's' : ''} · ${inativas} inativa${inativas !== 1 ? 's' : ''}`}
@@ -65,8 +65,8 @@ export default function TenantsPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-100">
-              <tr className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
+              <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                 <th className="px-6 py-3">Nome da Franquia</th>
                 <th className="px-6 py-3">Código CP</th>
                 <th className="px-6 py-3">Google Drive ID</th>
@@ -75,12 +75,12 @@ export default function TenantsPage() {
                 <th className="px-6 py-3 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
               {tenants.length === 0 ? (
                 <tr><td colSpan={6} className="px-6 py-10 text-center text-slate-400">Nenhuma franquia cadastrada.</td></tr>
               ) : tenants.map(t => (
-                <tr key={t.id} className={`transition-colors ${!t.ativo ? 'opacity-50' : 'hover:bg-slate-50'}`}>
-                  <td className="px-6 py-4 font-medium text-slate-900">{t.nome_franquia}</td>
+                <tr key={t.id} className={`transition-colors ${!t.ativo ? 'opacity-50' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
+                  <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">{t.nome_franquia}</td>
                   <td className="px-6 py-4">
                     {t.codigo_cp
                       ? <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded">{t.codigo_cp}</span>
@@ -277,7 +277,7 @@ function LicenseViewModal({ tenant, onClose }: { tenant: Tenant; onClose: () => 
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between text-sm border-b border-slate-100 pb-2">
+    <div className="flex items-center justify-between text-sm border-b border-slate-100 dark:border-slate-700/60 pb-2">
       <dt className="text-slate-500">{label}</dt>
       <dd className="font-medium text-slate-800">{children}</dd>
     </div>

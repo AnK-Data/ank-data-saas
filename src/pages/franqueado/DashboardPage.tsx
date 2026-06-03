@@ -293,7 +293,7 @@ export default function FranqueadoDashboardPage() {
             </div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+              <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
                 <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                   <th className="px-6 py-3">Loja</th>
                   <th className="px-6 py-3">Canal</th>
@@ -303,9 +303,9 @@ export default function FranqueadoDashboardPage() {
                   <th className="px-6 py-3 text-right">PA</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
                 {lojas.map((loja, i) => (
-                  <tr key={loja.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <tr key={loja.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="px-6 py-3.5">
                       <div className="flex items-center gap-2.5">
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full
@@ -339,7 +339,7 @@ export default function FranqueadoDashboardPage() {
           {lojas.length > 0 && (
             <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
               <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center">
-                ⚡ Dados disponíveis após o processamento dos arquivos de vendas · ANK Data Insights
+                ⚡ Dados disponíveis após o processamento dos arquivos de vendas · AnK Data Insights
               </p>
             </div>
           )}

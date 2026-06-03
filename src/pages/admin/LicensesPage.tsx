@@ -67,7 +67,7 @@ export default function LicensesPage() {
   return (
     <>
       <Card padding={false}>
-        <div className="px-6 py-5 border-b border-slate-100">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60">
           <CardHeader
             title="Controle de Licenciamento"
             subtitle="Vigências contratuais das franquias"
@@ -81,8 +81,8 @@ export default function LicensesPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-100">
-              <tr className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
+              <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                 <th className="px-6 py-3">Franquia</th>
                 <th className="px-6 py-3">Cód. CP</th>
                 <th className="px-6 py-3">Status</th>
@@ -93,12 +93,12 @@ export default function LicensesPage() {
                 <th className="px-6 py-3 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
               {licenses.length === 0 ? (
                 <tr><td colSpan={8} className="px-6 py-10 text-center text-slate-400">Nenhuma licença cadastrada.</td></tr>
               ) : licenses.map(lic => (
-                <tr key={lic.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-slate-900">
+                <tr key={lic.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
                     {lic.tenant?.nome_franquia ?? lic.tenant_id}
                   </td>
                   <td className="px-6 py-4">

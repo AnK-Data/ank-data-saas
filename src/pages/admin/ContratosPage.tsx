@@ -327,7 +327,7 @@ function ContratoPainel({ contrato, onClose, onUpdated }: {
               disabled={uploading}
               className="mt-3 w-full rounded-xl border border-slate-300 dark:border-slate-600
                 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300
-                hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">
+                hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">
               {uploading ? 'Enviando…' : contrato.arquivo_url ? '↺ Substituir arquivo' : '📎 Selecionar arquivo'}
             </button>
 
@@ -470,7 +470,7 @@ function NovoContratoModal({ templates, userId, onClose, onSaved }: {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 shadow-2xl
         ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
           <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Novo Contrato</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
             <XMarkIcon className="h-5 w-5" />
@@ -478,7 +478,7 @@ function NovoContratoModal({ templates, userId, onClose, onSaved }: {
         </div>
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto max-h-[75vh]">
           <Input label="Título do contrato *" value={titulo} onChange={e => setTitulo(e.target.value)} required
-            placeholder="Ex: Contrato ANK Data — CP Manoel 2026" />
+            placeholder="Ex: Contrato AnK Data — CP Manoel 2026" />
 
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Cliente (Franquia)</label>
@@ -596,7 +596,7 @@ function NovoTemplateModal({ userId: _userId, onClose, onSaved }: {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 shadow-2xl
         ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800 shrink-0">
           <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Novo Template</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
             <XMarkIcon className="h-5 w-5" />
@@ -604,7 +604,7 @@ function NovoTemplateModal({ userId: _userId, onClose, onSaved }: {
         </div>
         <form id="template-form" onSubmit={handleSubmit} className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
           <Input label="Título *" value={titulo} onChange={e => setTitulo(e.target.value)} required
-            placeholder="Ex: Template padrão ANK Data v1" />
+            placeholder="Ex: Template padrão AnK Data v1" />
           <Input label="Descrição" value={descricao} onChange={e => setDescricao(e.target.value)}
             placeholder="Uso, versão ou observação sobre o template" />
           <div className="flex flex-col gap-1">

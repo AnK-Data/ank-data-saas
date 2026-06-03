@@ -106,18 +106,18 @@ export default function PrimeiroAcessoPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <AnkLogo height={60} className="mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-slate-900">Primeiro Acesso</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Colaboradores Boticário — crie sua senha de acesso à plataforma ANK Data
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Primeiro Acesso</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500">
+            Colaboradores Boticário — crie sua senha de acesso à plataforma AnK Data
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-8 space-y-6">
 
           {/* Etapa 1 — Verificar ID */}
           {!checked ? (
@@ -131,9 +131,9 @@ export default function PrimeiroAcessoPage() {
                   value={ingresseId}
                   onChange={e => setIngresseId(e.target.value)}
                   placeholder="ex: ankdata26"
-                  className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-ank-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ank-200 transition-colors"
+                  className="block w-full rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm focus:border-ank-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ank-200 transition-colors"
                 />
-                <p className="mt-1.5 text-xs text-slate-400">
+                <p className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">
                   É o mesmo login que você usa na Extranet Boticário
                 </p>
               </div>
@@ -176,7 +176,7 @@ export default function PrimeiroAcessoPage() {
 
               {/* Nova senha */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-slate-700">Nova senha</label>
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Nova senha</label>
                 <div className="relative">
                   <LockClosedIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style={{ width: 17, height: 17 }} />
                   <input
@@ -195,7 +195,7 @@ export default function PrimeiroAcessoPage() {
 
               {/* Confirmar senha */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-slate-700">Confirmar senha</label>
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Confirmar senha</label>
                 <div className="relative">
                   <LockClosedIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style={{ width: 17, height: 17 }} />
                   <input
@@ -224,7 +224,7 @@ export default function PrimeiroAcessoPage() {
             </form>
           )}
 
-          <p className="text-center text-xs text-slate-400">
+          <p className="text-center text-xs text-slate-400 dark:text-slate-500">
             Já tem senha?{' '}
             <button onClick={() => navigate('/login')} className="text-ank-600 hover:underline font-medium">
               Ir para o login

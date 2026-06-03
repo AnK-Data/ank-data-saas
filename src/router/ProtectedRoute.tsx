@@ -28,7 +28,7 @@ export function ProtectedRoute() {
           <p className="text-sm text-red-600 mb-4">
             Usuário autenticado mas sem registro em{' '}
             <code className="bg-red-100 px-1 rounded">profiles</code>.
-            Contate o administrador ANK Data.
+            Contate o administrador AnK Data.
           </p>
           <button onClick={() => { window.location.href = '/login' }}
             className="text-sm font-medium text-red-700 underline">

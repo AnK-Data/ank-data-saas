@@ -86,7 +86,7 @@ export default function LojasPage() {
       </div>
 
       <Card padding={false}>
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
           <CardHeader
             title="Lojas / PDVs"
             subtitle={`${lojas.length} loja${lojas.length !== 1 ? 's' : ''} cadastrada${lojas.length !== 1 ? 's' : ''}`}
@@ -108,7 +108,7 @@ export default function LojasPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+            <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
               <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                 <th className="px-5 py-3">Nome da Loja</th>
                 <th className="px-5 py-3">Canal</th>
@@ -121,7 +121,7 @@ export default function LojasPage() {
                 <th className="px-5 py-3 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
               {lojas.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-6 py-14 text-center">
@@ -138,7 +138,7 @@ export default function LojasPage() {
                 </tr>
               ) : lojas.map(loja => (
                 <tr key={loja.id}
-                  className={`transition-colors ${!loja.ativo ? 'opacity-50' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
+                  className={`transition-colors ${!loja.ativo ? 'opacity-50' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50'}`}>
                   <td className="px-5 py-3.5 font-medium text-slate-900 dark:text-slate-100">{loja.nome}</td>
                   <td className="px-5 py-3.5"><CanalBadge canal={loja.canal} /></td>
                   <td className="px-5 py-3.5 text-slate-600 dark:text-slate-400 text-xs">
@@ -567,9 +567,9 @@ function LojaUploadModal({ open, tenantId, onClose, onSaved }: {
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
                   {rows.map((r, i) => (
-                    <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50">
                       <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">{r.nome}</td>
                       <td className="px-3 py-2 text-slate-500">{r.canal}</td>
                       <td className="px-3 py-2 text-slate-500">{r.nicho || '—'}</td>

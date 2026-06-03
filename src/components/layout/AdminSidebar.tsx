@@ -113,7 +113,7 @@ export default function AdminSidebar() {
       <div className={`flex h-16 items-center gap-3 border-b ${divider} px-5`}>
         <AnkLogo variant={isDark ? 'light' : 'color'} height={32} markOnly />
         <div className="leading-tight">
-          <p className={`text-sm font-bold tracking-wide ${textBrand}`}>ANK Data</p>
+          <p className={`text-sm font-bold tracking-wide ${textBrand}`}>AnK Data</p>
           <p className={`text-[10px] uppercase tracking-widest ${textMuted}`}>Admin Root</p>
         </div>
       </div>

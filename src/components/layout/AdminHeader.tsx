@@ -194,7 +194,7 @@ export default function AdminHeader({ pageTitle }: { pageTitle: string }) {
 
                   <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-800">
                     <p className="text-[10px] text-slate-400 text-center">
-                      ANK Data — Alertas automáticos em tempo real
+                      AnK Data — Alertas automáticos em tempo real
                     </p>
                   </div>
                 </div>

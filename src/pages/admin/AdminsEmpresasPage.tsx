@@ -201,7 +201,7 @@ export default function AdminsEmpresasPage() {
             <span className="text-2xl">{s.emoji}</span>
             <div>
               <p className="text-2xl font-black text-slate-900 dark:text-slate-100">{s.value}</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wide mt-0.5">{s.label}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-0.5">{s.label}</p>
             </div>
           </div>
         ))}
@@ -288,7 +288,7 @@ export default function AdminsEmpresasPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800"
+              <tr className="border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800"
                 style={{ backgroundColor: 'rgba(254,243,199,0.3)' }}>
                 {['Empresa', 'Usuário', 'CPF', 'Cargo · Role', 'Situação', 'Ingresse', 'Último login', ''].map(h => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400">
@@ -297,7 +297,7 @@ export default function AdminsEmpresasPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-14 text-center">
@@ -320,7 +320,7 @@ export default function AdminsEmpresasPage() {
                 const cargo  = PAPEL_LABELS[u.papel as keyof typeof PAPEL_LABELS] ?? u.papel
 
                 return (
-                  <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                  <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors group">
 
                     {/* Empresa */}
                     <td className="px-5 py-3.5">
@@ -427,7 +427,7 @@ export default function AdminsEmpresasPage() {
 
         {filtered.length > 0 && (
           <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400 dark:text-slate-500 text-center">
-            {filtered.length} usuário{filtered.length !== 1 ? 's' : ''} · ANK Data
+            {filtered.length} usuário{filtered.length !== 1 ? 's' : ''} · AnK Data
           </div>
         )}
       </div>
@@ -503,7 +503,7 @@ function InviteUsuarioModal({ onClose, onSaved }: { onClose: () => void; onSaved
         <div className="relative w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 shadow-2xl
           ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden">
 
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
             <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Novo Usuário de Franquia</h2>
             <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
               <XMarkIcon className="h-5 w-5" />

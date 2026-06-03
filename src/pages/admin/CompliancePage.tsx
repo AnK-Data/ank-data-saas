@@ -75,7 +75,7 @@ export default function CompliancePage() {
 
       {/* Tabela de conformidade */}
       <Card padding={false}>
-        <div className="px-6 py-5 border-b border-slate-100">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60">
           <CardHeader
             title="Monitor de Conformidade"
             subtitle={`${ok.length} conforme${ok.length !== 1 ? 's' : ''} · ${compromised.length} comprometida${compromised.length !== 1 ? 's' : ''}`}
@@ -93,8 +93,8 @@ export default function CompliancePage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-100">
-              <tr className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
+              <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                 <th className="px-6 py-3">Status</th>
                 <th className="px-6 py-3">Nome da Franquia</th>
                 <th className="px-6 py-3">Código CP</th>
@@ -102,7 +102,7 @@ export default function CompliancePage() {
                 <th className="px-6 py-3 text-right">Dias sem Upload</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
               {compliance.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-10 text-center text-slate-400">
@@ -116,7 +116,7 @@ export default function CompliancePage() {
                     className={`transition-colors ${
                       c.compliance_status === 'COMPROMETIDO'
                         ? 'bg-red-50/40 hover:bg-red-50'
-                        : 'hover:bg-slate-50'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                     }`}
                   >
                     <td className="px-6 py-4">
@@ -127,7 +127,7 @@ export default function CompliancePage() {
                         }
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-medium text-slate-900">{c.tenant_name}</td>
+                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">{c.tenant_name}</td>
                     <td className="px-6 py-4">
                       {c.codigo_cp
                         ? <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded">{c.codigo_cp}</span>
@@ -158,7 +158,7 @@ export default function CompliancePage() {
 
       {/* Histórico de uploads */}
       <Card padding={false}>
-        <div className="px-6 py-5 border-b border-slate-100">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60">
           <CardHeader
             title="Histórico de Uploads"
             subtitle="Últimos 50 arquivos enviados"
@@ -167,14 +167,14 @@ export default function CompliancePage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-100">
-              <tr className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
+              <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                 <th className="px-6 py-3">Franquia</th>
                 <th className="px-6 py-3">Arquivo</th>
                 <th className="px-6 py-3 text-right">Data do Upload</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
               {logs.length === 0 ? (
                 <tr>
                   <td colSpan={3} className="px-6 py-10 text-center text-slate-400">
@@ -183,7 +183,7 @@ export default function CompliancePage() {
                 </tr>
               ) : (
                 logs.map(log => (
-                  <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="px-6 py-3.5 font-medium text-slate-800">
                       {log.tenant?.nome_franquia ?? log.tenant_id}
                     </td>

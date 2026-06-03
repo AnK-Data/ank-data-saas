@@ -405,7 +405,7 @@ function ConfiguracaoTab({ digestOn, onToggleDigest, prefs, onTogglePref }: {
 
       {/* Preferências por evento */}
       <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
           <p className="font-semibold text-slate-900 dark:text-slate-100">Preferências de notificação</p>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Liga ou desliga cada categoria por canal. Suas escolhas são individuais.
@@ -421,12 +421,12 @@ function ConfiguracaoTab({ digestOn, onToggleDigest, prefs, onTogglePref }: {
           <span className="text-center">💬&nbsp;WhatsApp</span>
         </div>
 
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+        <div className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
           {EVENTOS_PADRAO.map(ev => {
             const pref = prefs[ev.evento] ?? { sino: true, email: false, whatsapp: false }
             return (
               <div key={ev.evento} className="grid grid-cols-[1fr_110px_110px_120px] gap-2 px-5 py-3.5 items-center
-                hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors">
                 <div>
                   <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{ev.label}</p>
                   <p className="text-xs text-slate-400 dark:text-slate-500">{ev.descricao}</p>

@@ -132,7 +132,7 @@ export default function FranchiseUsersPage() {
   return (
     <>
       <Card padding={false}>
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
           <CardHeader
             title="Usuários da Franquia"
             subtitle={`${users.length} colaborador${users.length !== 1 ? 'es' : ''} · ${users.filter(u => u.profile_id).length} com conta criada${filtered.length !== users.length ? ` · ${filtered.length} exibidos` : ''}`}
@@ -153,25 +153,28 @@ export default function FranchiseUsersPage() {
         </div>
 
         {/* ── Filtros ──────────────────────────────────────────────────── */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-3">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/40 flex flex-wrap gap-3">
           {/* Busca */}
-          <div className="relative flex-1 min-w-[200px]">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="relative flex-1 min-w-[220px]">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Buscar por nome ou ID Ingresse…"
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800
-                text-slate-900 dark:text-slate-100 pl-9 pr-3 py-2 text-sm focus:border-ank-400 focus:outline-none focus:ring-2 focus:ring-ank-200"
+              className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800
+                text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500
+                pl-9 pr-3 py-2 text-sm focus:border-ank-500 dark:focus:border-ank-400
+                focus:outline-none focus:ring-2 focus:ring-ank-200 dark:focus:ring-ank-800 transition-colors"
             />
           </div>
 
           {/* Status */}
           <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value as typeof filtroStatus)}
-            className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800
-              text-slate-700 dark:text-slate-300 px-3 py-2 text-sm">
+            className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800
+              text-slate-700 dark:text-slate-200 px-3 py-2 text-sm focus:outline-none
+              focus:ring-2 focus:ring-ank-200 dark:focus:ring-ank-800">
             <option value="todos">Status: todos</option>
             <option value="Ativo">Ativo</option>
             <option value="Inativo">Inativo</option>
@@ -180,8 +183,9 @@ export default function FranchiseUsersPage() {
           {/* Cargo */}
           {cargosDisponiveis.length > 0 && (
             <select value={filtroCargo} onChange={e => setFiltroCargo(e.target.value)}
-              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800
-                text-slate-700 dark:text-slate-300 px-3 py-2 text-sm max-w-[200px]">
+              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800
+                text-slate-700 dark:text-slate-200 px-3 py-2 text-sm max-w-[220px] focus:outline-none
+                focus:ring-2 focus:ring-ank-200 dark:focus:ring-ank-800">
               <option value="">Cargo: todos</option>
               {cargosDisponiveis.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
@@ -190,8 +194,9 @@ export default function FranchiseUsersPage() {
           {/* Loja */}
           {lojasDisponiveis.length > 0 && (
             <select value={filtroLoja} onChange={e => setFiltroLoja(e.target.value)}
-              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800
-                text-slate-700 dark:text-slate-300 px-3 py-2 text-sm max-w-[200px]">
+              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800
+                text-slate-700 dark:text-slate-200 px-3 py-2 text-sm max-w-[220px] focus:outline-none
+                focus:ring-2 focus:ring-ank-200 dark:focus:ring-ank-800">
               <option value="">Loja: todas</option>
               {lojasDisponiveis.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
@@ -200,7 +205,7 @@ export default function FranchiseUsersPage() {
           {/* Limpar filtros */}
           {(search || filtroStatus !== 'todos' || filtroCargo || filtroLoja) && (
             <button onClick={() => { setSearch(''); setFiltroStatus('todos'); setFiltroCargo(''); setFiltroLoja('') }}
-              className="text-xs text-slate-500 hover:text-red-500 transition-colors px-2">
+              className="text-xs text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors px-2">
               ✕ Limpar
             </button>
           )}
@@ -208,8 +213,8 @@ export default function FranchiseUsersPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
-              <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+              <tr className="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 <th className="px-6 py-3">Usuário</th>
                 <th className="px-6 py-3">Status</th>
                 <th className="px-6 py-3">Função</th>
@@ -218,7 +223,7 @@ export default function FranchiseUsersPage() {
                 <th className="px-6 py-3 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-700/50">
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
@@ -229,7 +234,7 @@ export default function FranchiseUsersPage() {
                   </td>
                 </tr>
               ) : filtered.map(user => (
-                <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50/80 dark:hover:bg-slate-800/60 transition-colors">
                   {/* Usuário */}
                   <td className="px-6 py-4 min-w-[220px]">
                     <div className="flex items-center gap-3">
@@ -253,8 +258,9 @@ export default function FranchiseUsersPage() {
                           </p>
                         )}
                         {/* ID Ingresse */}
-                        <span className="inline-flex items-center gap-0.5 mt-0.5 rounded px-1.5 py-0.5
-                          bg-slate-100 dark:bg-slate-800 text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                        <span className="inline-flex items-center gap-1 mt-1 rounded-md px-2 py-0.5
+                          bg-slate-100 dark:bg-slate-700/70 border border-slate-200 dark:border-slate-600
+                          text-[10px] font-mono text-slate-600 dark:text-slate-300">
                           🎫 {user.ingresse_id}
                         </span>
                         {user.first_access && user.status === 'Ativo' && (
@@ -303,14 +309,14 @@ export default function FranchiseUsersPage() {
                         ))}
                       </div>
                     ) : user.franquia_code ? (
-                      /* Código PDV sem loja cadastrada correspondente */
-                      <span className="inline-flex items-center gap-1 text-xs bg-slate-100 dark:bg-slate-800
+                      <span className="inline-flex items-center gap-1 text-xs
+                        bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600
                         text-slate-500 dark:text-slate-400 rounded-full px-2 py-0.5 font-mono">
                         <BuildingStorefrontIcon className="h-3 w-3 shrink-0" />
                         {user.franquia_code}
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-400 dark:text-slate-500 italic">—</span>
+                      <span className="text-xs text-slate-300 dark:text-slate-600">—</span>
                     )}
                   </td>
 
@@ -327,8 +333,8 @@ export default function FranchiseUsersPage() {
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-slate-400 dark:text-slate-500 italic flex items-center gap-1">
-                        <ShieldCheckIcon className="h-3 w-3" />Padrão do papel
+                      <span className="text-xs text-slate-400 dark:text-slate-500 italic flex items-center gap-1.5">
+                        <ShieldCheckIcon className="h-3 w-3 shrink-0" />Padrão do papel
                       </span>
                     )}
                   </td>
@@ -570,7 +576,7 @@ function UserModal({ open, initial, tenantId, onClose, onSaved }: {
                     className={`flex-1 py-2 text-xs font-medium transition-colors
                       ${tipoUsuario === opt.value
                         ? 'bg-slate-900 text-white'
-                        : 'bg-white dark:bg-slate-800 text-slate-500 hover:bg-slate-50'}`}>
+                        : 'bg-white dark:bg-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
                     {opt.label}
                   </button>
                 ))}
@@ -887,7 +893,7 @@ function IngresseUploadModal({ open, tenantId, onClose, onSaved }: {
                     <th className="px-3 py-2">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-700/50">
                   {parsed.rows.slice(0, 30).map((r, i) => (
                     <tr key={i} className={r.Status?.toLowerCase() === 'inativo' ? 'opacity-50' : ''}>
                       <td className="px-3 py-1.5 font-mono text-slate-600 dark:text-slate-400">{String(r.Login ?? '')}</td>

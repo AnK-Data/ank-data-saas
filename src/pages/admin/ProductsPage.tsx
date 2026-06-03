@@ -35,7 +35,7 @@ export default function ProductsPage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Base Mestre de Produtos</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Base global da ANK Data — todos os módulos consultam esta fonte.
+            Base global da AnK Data — todos os módulos consultam esta fonte.
             {total > 0 && (
               <span className="ml-2 font-medium text-ank-600 dark:text-ank-400">
                 {total.toLocaleString('pt-BR')} produtos cadastrados

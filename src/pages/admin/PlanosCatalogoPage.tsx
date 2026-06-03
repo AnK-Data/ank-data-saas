@@ -68,7 +68,7 @@ export default function PlanosCatalogoPage() {
       </div>
 
       <Card padding={false}>
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
           <CardHeader
             title="Catálogo de Planos"
             subtitle="Defina os planos disponíveis para as franquias"
@@ -82,7 +82,7 @@ export default function PlanosCatalogoPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+            <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
               <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                 <th className="px-6 py-3">Plano</th>
                 <th className="px-6 py-3">Descrição</th>
@@ -92,11 +92,11 @@ export default function PlanosCatalogoPage() {
                 <th className="px-6 py-3 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
               {planos.length === 0 ? (
                 <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400">Nenhum plano cadastrado.</td></tr>
               ) : planos.map(p => (
-                <tr key={p.id} className={`transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${!p.ativo ? 'opacity-50' : ''}`}>
+                <tr key={p.id} className={`transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 ${!p.ativo ? 'opacity-50' : ''}`}>
                   <td className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">{p.nome}</td>
                   <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs max-w-xs">{p.descricao ?? '—'}</td>
                   <td className="px-6 py-4 text-right font-semibold text-slate-800 dark:text-slate-200">{brl(p.preco_mensal)}</td>
@@ -176,7 +176,7 @@ function PlanoModal({ initial, onClose, onSaved }: {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 shadow-2xl
         ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
           <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
             {initial ? `Editar — ${initial.nome}` : 'Novo Plano'}
           </h2>

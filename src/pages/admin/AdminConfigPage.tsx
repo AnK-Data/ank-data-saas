@@ -66,7 +66,7 @@ export default function AdminConfigPage() {
     setPrimary(ANK_PRIMARY); setSecondary(ANK_SECONDARY)
     localStorage.removeItem('ank_admin_primary'); localStorage.removeItem('ank_admin_secondary')
     applyColors(ANK_PRIMARY, ANK_SECONDARY)
-    toast('Cores restauradas ao padrão ANK Data.')
+    toast('Cores restauradas ao padrão AnK Data.')
   }
 
   return (
@@ -128,7 +128,7 @@ export default function AdminConfigPage() {
 
         <button type="button" onClick={resetColors}
           className="mt-3 text-xs text-slate-400 hover:text-red-500 transition-colors">
-          ↺ Restaurar padrão ANK Data ({ANK_PRIMARY} / {ANK_SECONDARY})
+          ↺ Restaurar padrão AnK Data ({ANK_PRIMARY} / {ANK_SECONDARY})
         </button>
       </div>
 

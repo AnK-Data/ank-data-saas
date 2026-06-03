@@ -56,21 +56,21 @@ export default function RedefinirSenhaPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <AnkLogo height={60} className="mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-slate-900">Defina sua senha</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Defina sua senha</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500">
             {profile?.nome ? `Olá, ${profile.nome.split(' ')[0]}! ` : ''}
             Por segurança, crie uma senha pessoal para continuar.
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-5">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-8 space-y-5">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-slate-700">Nova senha</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Nova senha</label>
               <div className="relative">
                 <LockClosedIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style={{ width: 17, height: 17 }} />
                 <input
@@ -88,7 +88,7 @@ export default function RedefinirSenhaPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-slate-700">Confirmar senha</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Confirmar senha</label>
               <div className="relative">
                 <LockClosedIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style={{ width: 17, height: 17 }} />
                 <input

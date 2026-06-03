@@ -138,7 +138,7 @@ export default function ConfiguracaoPage() {
             Configuração — {config.nome_franquia}
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Personalize sua franquia na plataforma ANK Data
+            Personalize sua franquia na plataforma AnK Data
           </p>
         </div>
         <Button type="submit" loading={saving}>
@@ -270,7 +270,7 @@ export default function ConfiguracaoPage() {
                 { label: 'Insights de IA disponíveis', checked: false },
               ].map((item, i) => (
                 <label key={i}
-                  className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                  className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 transition-colors">
                   <span className="text-sm text-slate-700 dark:text-slate-300">{item.label}</span>
                   <input type="checkbox" defaultChecked={item.checked}
                     className="h-4 w-4 rounded accent-ank-600" />

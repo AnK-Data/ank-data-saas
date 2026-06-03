@@ -1,5 +1,5 @@
 /**
- * AnkLogo — Logotipo vetorial oficial da ANK Data.
+ * AnkLogo — Logotipo vetorial oficial da AnK Data.
  *
  * Variantes:
  *   - dark   : mark em #32343A (uso em fundo branco/claro)
@@ -42,7 +42,7 @@ export default function AnkLogo({
       preserveAspectRatio="xMidYMid meet"
       className={className}
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="ANK Data"
+      aria-label="AnK Data"
       fill="none"
     >
       {/* ── Stroke principal esquerdo (perna esquerda do A) ─────────────── */}

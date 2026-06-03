@@ -44,7 +44,7 @@ export function applyFranchiseColors(primary: string, secondary: string) {
   }
 
   tag.textContent = `
-    /* ─── ANK Data — Franchise Theme (Spec 11) ─── */
+    /* ─── AnK Data — Franchise Theme (Spec 11) ─── */
     :root {
       --fp-primary:       ${primary};
       --fp-secondary:     ${secondary};

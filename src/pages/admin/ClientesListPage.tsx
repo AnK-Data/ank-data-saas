@@ -170,7 +170,7 @@ export default function ClientesListPage() {
             {/* Atualizar */}
             <button onClick={() => { setLoading(true); fetchClientes() }}
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700
-                text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 transition-colors">
               <ArrowPathIcon className="h-4 w-4" />
             </button>
 
@@ -231,7 +231,7 @@ function TabelaView({ clientes, onEdit, onRefresh }: {
     <Card padding={false}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-amber-50/60 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+          <thead className="bg-amber-50/60 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
             <tr className="text-left text-xs font-semibold text-slate-600 dark:text-slate-400">
               <th className="px-5 py-3">Empresa</th>
               <th className="px-5 py-3">Score</th>
@@ -243,7 +243,7 @@ function TabelaView({ clientes, onEdit, onRefresh }: {
               <th className="px-5 py-3 text-right">Ações</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
             {clientes.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-5 py-12 text-center text-slate-400">
@@ -258,7 +258,7 @@ function TabelaView({ clientes, onEdit, onRefresh }: {
                 : null
 
               return (
-                <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors group">
 
                   {/* Empresa */}
                   <td className="px-5 py-3.5">

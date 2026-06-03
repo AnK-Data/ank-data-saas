@@ -22,7 +22,7 @@ export interface NotifPreferencia {
   whatsapp: boolean
 }
 
-// Eventos padrão do sistema ANK Data
+// Eventos padrão do sistema AnK Data
 export const EVENTOS_PADRAO: { evento: string; label: string; descricao: string }[] = [
   { evento: 'upload_concluido',  label: 'Upload de arquivo concluído',         descricao: 'Quando um arquivo de vendas é processado com sucesso.' },
   { evento: 'upload_erro',       label: 'Erro no upload de arquivo',           descricao: 'Quando um arquivo falha na validação ou envio.' },
@@ -30,7 +30,7 @@ export const EVENTOS_PADRAO: { evento: string; label: string; descricao: string 
   { evento: 'licenca_critica',   label: 'Licença expirando (7 dias)',          descricao: 'Alerta crítico de vencimento iminente.' },
   { evento: 'conformidade_alert',label: 'Franquia sem upload há 7 dias',       descricao: 'Alerta de conformidade de envio de relatórios.' },
   { evento: 'novo_usuario',      label: 'Novo usuário adicionado',             descricao: 'Quando um novo membro é convidado para a franquia.' },
-  { evento: 'nova_feature',      label: 'Nova funcionalidade ANK Data',        descricao: 'Anúncios de novidades e melhorias da plataforma.' },
+  { evento: 'nova_feature',      label: 'Nova funcionalidade AnK Data',        descricao: 'Anúncios de novidades e melhorias da plataforma.' },
   { evento: 'manutencao',        label: 'Manutenção programada',               descricao: 'Avisos de janelas de manutenção do sistema.' },
 ]
 
@@ -76,7 +76,7 @@ export const NotificacoesService = {
       ...prefs,
     }),
 
-  /** Cria notificação do sistema (ANK Data) para um tenant */
+  /** Cria notificação do sistema (AnK Data) para um tenant */
   createForTenant: (tenantId: string, data: {
     titulo: string; corpo: string; tipo: TipoNotificacao; categoria?: string; obrigatoria?: boolean
   }) =>

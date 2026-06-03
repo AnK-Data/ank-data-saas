@@ -46,7 +46,7 @@ export default function RegisterPage() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-ank-500 text-white text-2xl font-bold shadow-lg">
             A
           </div>
-          <h1 className="text-2xl font-bold text-white">ANK Data</h1>
+          <h1 className="text-2xl font-bold text-white">AnK Data</h1>
           <p className="text-sm text-white/50 mt-1">Criar conta</p>
         </div>
 

@@ -243,7 +243,7 @@ export default function UploadPage() {
 
       {/* ── Histórico com filtros ──────────────────────────────────── */}
       <Card padding={false}>
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
           <CardHeader
             title="Arquivos enviados"
             subtitle={`${filtered.length} de ${history.length} registro${history.length !== 1 ? 's' : ''}`}
@@ -251,7 +251,7 @@ export default function UploadPage() {
         </div>
 
         {/* Barra de filtros */}
-        <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+        <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
               <FunnelIcon className="h-3.5 w-3.5" />
@@ -330,7 +330,7 @@ export default function UploadPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+              <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
                 <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                   <th className="px-6 py-3 min-w-[260px]">Arquivo</th>
                   <th className="px-5 py-3 w-28">Status</th>
@@ -339,9 +339,9 @@ export default function UploadPage() {
                   <th className="px-5 py-3 min-w-[160px]">Usuário</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
                 {filtered.map(h => (
-                  <tr key={h.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <tr key={h.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors">
                     {/* Arquivo */}
                     <td className="px-6 py-3.5">
                       <div className="flex items-center gap-2.5">

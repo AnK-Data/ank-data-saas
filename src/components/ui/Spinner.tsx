@@ -2,7 +2,6 @@ import { clsx } from 'clsx'
 
 interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg'
-  /** Render centered over the full viewport */
   fullScreen?: boolean
   className?: string
 }
@@ -17,7 +16,7 @@ export default function Spinner({ size = 'md', fullScreen, className }: SpinnerP
   const spinner = (
     <div
       className={clsx(
-        'animate-spin rounded-full border-slate-200 border-t-ank-600',
+        'animate-spin rounded-full border-slate-200 dark:border-slate-700 border-t-ank-600 dark:border-t-ank-400',
         sizes[size],
         className,
       )}
@@ -28,10 +27,10 @@ export default function Spinner({ size = 'md', fullScreen, className }: SpinnerP
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
         <div className="flex flex-col items-center gap-3">
           {spinner}
-          <span className="text-sm text-slate-500">Carregando…</span>
+          <span className="text-sm text-slate-500 dark:text-slate-400">Carregando…</span>
         </div>
       </div>
     )

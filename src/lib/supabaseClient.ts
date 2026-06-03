@@ -6,7 +6,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undef
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
 
 if (!isSupabaseConfigured) {
-  console.warn('[ANK Data] Supabase não configurado. Crie .env.local com as variáveis.')
+  console.warn('[AnK Data] Supabase não configurado. Crie .env.local com as variáveis.')
 }
 
 export const supabase = createClient(

@@ -33,7 +33,7 @@ export default function LicenseAlertBanner() {
         <ExclamationTriangleIcon className="h-4 w-4 shrink-0" />
         <span>
           <strong>Atenção:</strong> Sua licença vence em <strong>{dias} dias</strong> ({vencimento}).
-          {' '}Entre em contato com a ANK Data para renovação:{' '}
+          {' '}Entre em contato com a AnK Data para renovação:{' '}
           <a href="mailto:suporte@ankdata.com.br" className="underline font-semibold">
             suporte@ankdata.com.br
           </a>

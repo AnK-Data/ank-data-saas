@@ -93,7 +93,7 @@ export default function FranchiseSidebar() {
           A
         </div>
         <div className="leading-tight min-w-0">
-          <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">ANK Data</p>
+          <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">AnK Data</p>
           <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">Painel Franqueado</p>
         </div>
       </div>

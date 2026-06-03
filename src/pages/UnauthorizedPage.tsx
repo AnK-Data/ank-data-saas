@@ -21,7 +21,7 @@ export default function UnauthorizedPage() {
       <h1 className="mb-2 text-2xl font-bold text-slate-900">Acesso Negado</h1>
       <p className="mb-8 max-w-sm text-center text-sm text-slate-500">
         Você não tem permissão para acessar esta área. Esta seção é restrita
-        a administradores internos da ANK Data.
+        a administradores internos da AnK Data.
       </p>
 
       <Button variant="secondary" onClick={handleSignOut}>

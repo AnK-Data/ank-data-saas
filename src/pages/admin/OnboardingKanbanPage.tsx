@@ -134,7 +134,7 @@ export default function OnboardingKanbanPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Kanban de Implantação</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Acompanhamento de cada cliente no processo de implantação ANK Data.
+              Acompanhamento de cada cliente no processo de implantação AnK Data.
             </p>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function OnboardingKanbanPage() {
           <button onClick={() => { setLoading(true); fetchCards() }}
             className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700
               px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400
-              hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 transition-colors">
             <ArrowPathIcon className="h-4 w-4" />
             Recarregar
           </button>

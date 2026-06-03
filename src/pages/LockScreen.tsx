@@ -37,7 +37,7 @@ export default function LockScreen() {
       </p>
       <p className="mb-8 max-w-sm text-center text-sm text-white/50">
         O período de licença da sua franquia expirou ou foi suspenso.
-        Entre em contato com a equipe ANK Data para regularizar sua situação.
+        Entre em contato com a equipe AnK Data para regularizar sua situação.
       </p>
 
       {/* Contact */}
@@ -53,7 +53,7 @@ export default function LockScreen() {
 
       {/* Visual watermark */}
       <p className="mt-12 text-xs text-white/20 tracking-widest uppercase">
-        ANK Data — Sistema de Gestão de Franquias
+        AnK Data — Sistema de Gestão de Franquias
       </p>
     </div>
   )

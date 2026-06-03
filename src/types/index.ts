@@ -1,4 +1,4 @@
-// ─── Domínio ANK Data (usuários internos) ─────────────────────────────────────
+// ─── Domínio AnK Data (usuários internos) ─────────────────────────────────────
 
 export type AnkRole =
   | 'ank_admin'       // Acesso total — gerencia tenants, licenças e plataforma
@@ -100,7 +100,7 @@ export function isFranqueadoRole(role: UserRole): role is FranqueadoRole {
 // ─── Labels de exibição ───────────────────────────────────────────────────────
 
 export const PAPEL_LABELS: Record<UserRole, string> = {
-  // ANK Data
+  // AnK Data
   ank_admin:                        'Administrador ANK',
   ank_suporte:                      'Suporte ANK',
   ank_comercial:                    'Comercial ANK',
@@ -207,7 +207,7 @@ export interface Profile {
   tenant_id: string | null
   nome: string
   papel: UserRole
-  /** 'ank' = usuário interno ANK Data | 'franqueado' = usuário de franquia Boticário */
+  /** 'ank' = usuário interno AnK Data | 'franqueado' = usuário de franquia Boticário */
   dominio: 'ank' | 'franqueado'
   /** Canal de atuação — obrigatório para domínio franqueado */
   canal: Canal | null

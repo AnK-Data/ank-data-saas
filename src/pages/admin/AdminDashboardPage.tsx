@@ -137,7 +137,7 @@ export default function AdminDashboardPage() {
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
+                  <tr className="border-b border-slate-100 dark:border-slate-700/60 text-left text-xs text-slate-500">
                     <th className="pb-2 font-medium">Franquia</th>
                     <th className="pb-2 font-medium">Status</th>
                     <th className="pb-2 font-medium text-right">Dias</th>
@@ -181,7 +181,7 @@ export default function AdminDashboardPage() {
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
+                  <tr className="border-b border-slate-100 dark:border-slate-700/60 text-left text-xs text-slate-500">
                     <th className="pb-2 font-medium">Franquia</th>
                     <th className="pb-2 font-medium text-right">Dias sem upload</th>
                     <th className="pb-2 font-medium text-right">Status</th>
@@ -225,7 +225,7 @@ function StatCard({
   return (
     <Card>
       <div className={`mb-3 inline-flex rounded-lg p-2.5 ${bg}`}>{icon}</div>
-      <p className="text-2xl font-bold text-slate-900">{value}</p>
+      <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
       <p className="mt-0.5 text-sm text-slate-500">{label}</p>
     </Card>
   )

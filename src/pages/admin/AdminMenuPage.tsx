@@ -108,7 +108,7 @@ export default function AdminMenuPage() {
       </div>
 
       <Card padding={false}>
-        <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+        <ul className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
           {items.map((item, idx) => (
             <li key={item.id}
               className="flex items-center gap-4 px-5 py-4 bg-white dark:bg-slate-900 transition-colors">

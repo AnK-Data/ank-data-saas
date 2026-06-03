@@ -59,7 +59,7 @@ export default function UsersPage() {
   async function fetchUsers() {
     const { data, error } = await UsersService.list()
     if (!error && data) {
-      // Filtra apenas usuários internos da ANK Data
+      // Filtra apenas usuários internos da AnK Data
       setUsers((data as ProfileRow[]).filter(u => isAnkRole(u.papel)))
     }
     setLoading(false)
@@ -75,10 +75,10 @@ export default function UsersPage() {
 
         {/* ── Header geral ──────────────────────────────────────────────── */}
         <Card padding={false}>
-          <div className="px-6 py-5 border-b border-slate-100">
+          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60">
             <CardHeader
-              title="Usuários ANK Data"
-              subtitle={`${users.length} membro${users.length !== 1 ? 's' : ''} da equipe interna ANK Data`}
+              title="Usuários AnK Data"
+              subtitle={`${users.length} membro${users.length !== 1 ? 's' : ''} da equipe interna AnK Data`}
               action={
                 <Button size="sm" leftIcon={<PlusIcon className="h-4 w-4" />} onClick={() => setInviteOpen(true)}>
                   + Convidar Usuário
@@ -89,8 +89,8 @@ export default function UsersPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b border-slate-100">
-                <tr className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+              <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
+                <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                   <th className="px-6 py-3">Usuário</th>
                   <th className="px-6 py-3">Papel / Função</th>
                   <th className="px-6 py-3">Franquia Vinculada</th>
@@ -98,13 +98,13 @@ export default function UsersPage() {
                   <th className="px-6 py-3 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                 {users.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-10 text-center text-slate-400">Nenhum usuário encontrado.</td>
                   </tr>
                 ) : users.map(user => (
-                  <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
 
                     {/* Avatar + Nome */}
                     <td className="px-6 py-4">
@@ -120,7 +120,7 @@ export default function UsersPage() {
                           {user.nome.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-medium text-slate-900">{user.nome}</p>
+                          <p className="font-medium text-slate-900 dark:text-slate-100">{user.nome}</p>
                         </div>
                       </div>
                     </td>
@@ -135,7 +135,7 @@ export default function UsersPage() {
                       {user.papel === 'ank_admin' ? (
                         <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
                           <ShieldCheckIcon className="h-3.5 w-3.5 text-ank-600" />
-                          Interno ANK Data
+                          Interno AnK Data
                         </span>
                       ) : user.tenant?.nome_franquia ? (
                         <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 font-medium">
@@ -199,8 +199,8 @@ export default function UsersPage() {
 
 // ─── Modal de Convite (visão Admin ROOT) ─────────────────────────────────────
 /**
- * O Admin ROOT da ANK Data pode convidar apenas dois tipos de usuários:
- *  1. Administrador Interno ANK Data  → papel: 'ank_admin'  (sem franquia)
+ * O Admin ROOT da AnK Data pode convidar apenas dois tipos de usuários:
+ *  1. Administrador Interno AnK Data  → papel: 'ank_admin'  (sem franquia)
  *  2. Franqueado / Sucessor            → papel: 'franqueado' | 'sucessor' (franquia obrigatória)
  *
  * Usuários operacionais (cargos Boticário) são criados pelo
@@ -371,7 +371,7 @@ function InviteModal({ open, onClose, onSaved }: {
           }
           <span>
             {tipo === 'ank_admin'
-              ? 'Este usuário terá acesso total ao painel Admin ROOT da ANK Data.'
+              ? 'Este usuário terá acesso total ao painel Admin ROOT da AnK Data.'
               : 'O Admin de Franquia acessa o painel do franqueado e poderá criar Vendedores e Controllers para sua equipe.'
             }
           </span>

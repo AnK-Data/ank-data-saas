@@ -4,7 +4,7 @@ interface AnkMascotProps {
 }
 
 /**
- * Ankito — Mascote oficial da ANK Data.
+ * Ankito — Mascote oficial da AnK Data.
  * Design futurista: corpo angular com armadura, visor neon cyan,
  * núcleo de energia hexagonal e detalhes de circuito.
  */
@@ -15,7 +15,7 @@ export default function AnkMascot({ className, height }: AnkMascotProps) {
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       style={height ? { height, width: 'auto' } : undefined}
-      aria-label="Ankito — mascote futurista da ANK Data"
+      aria-label="Ankito — mascote futurista da AnK Data"
     >
       <defs>
         {/* Metálico escuro — brand dark #32343A */}

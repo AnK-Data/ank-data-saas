@@ -28,7 +28,7 @@ interface AuthContextValue {
   user: User | null
   profile: Profile | null
   profileLoading: boolean
-  /** Login por e-mail (ANK Data / Prestadores) */
+  /** Login por e-mail (AnK Data / Prestadores) */
   signIn: (email: string, password: string) => Promise<SignInResult>
   /** Login por Ingresse ID (colaboradores de franquia) */
   signInIngresse: (ingresseId: string, password: string) => Promise<SignInResult>
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  // ─── Login por e-mail (ANK Data / Prestadores) ──────────────────────────────
+  // ─── Login por e-mail (AnK Data / Prestadores) ──────────────────────────────
 
   async function signIn(email: string, password: string): Promise<SignInResult> {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
