@@ -27,13 +27,9 @@ export async function listProducts(
     }
   }
 
-  if (filters.marca)         query = query.eq('marca',         filters.marca)
-  if (filters.linha)         query = query.eq('linha',         filters.linha)
-  if (filters.familia)       query = query.eq('familia',       filters.familia)
-  if (filters.secao)         query = query.eq('secao',         filters.secao)
-  if (filters.grupo)         query = query.eq('grupo',         filters.grupo)
-  if (filters.subgrupo)      query = query.eq('subgrupo',      filters.subgrupo)
-  if (filters.fora_de_linha) query = query.eq('fora_de_linha', filters.fora_de_linha)
+  if (filters.marca_estrutura) query = query.eq('marca_estrutura', filters.marca_estrutura)
+  if (filters.linha)           query = query.eq('linha',           filters.linha)
+  if (filters.secao)           query = query.eq('secao',           filters.secao)
 
   const from = page * pageSize
   const to   = from + pageSize - 1
@@ -55,22 +51,25 @@ export async function listProducts(
 // ─── Opções únicas para filtros ───────────────────────────────────────────────
 
 export async function getFilterOptions(): Promise<ProductFilterOptions> {
+  // Busca valores distintos apenas para os 3 filtros exibidos
   const col = async (column: string): Promise<string[]> => {
     const { data } = await supabase
       .from('products')
       .select(column)
       .not(column, 'is', null)
       .order(column)
+      .limit(5000)
     const unique = [...new Set((data ?? []).map((r: unknown) => (r as Record<string, string>)[column]).filter(Boolean))]
-    return unique as string[]
+    return (unique as string[]).sort()
   }
 
-  const [marcas, linhas, familias, secoes, grupos, subgrupos] = await Promise.all([
-    col('marca'), col('linha'), col('familia'),
-    col('secao'), col('grupo'), col('subgrupo'),
+  const [marcas, linhas, secoes] = await Promise.all([
+    col('marca_estrutura'),   // BOT, EUD, OUI, QDB — código principal
+    col('linha'),
+    col('secao'),
   ])
 
-  return { marcas, linhas, familias, secoes, grupos, subgrupos }
+  return { marcas, linhas, familias: [], secoes, grupos: [], subgrupos: [] }
 }
 
 // ─── Importação em lote ───────────────────────────────────────────────────────

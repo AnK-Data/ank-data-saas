@@ -19,6 +19,14 @@ interface KanbanStage {
 
 const STAGES: KanbanStage[] = [
   {
+    id:     'captacao',
+    label:  'Captação',
+    desc:   'Lead identificado — proposta em andamento',
+    emoji:  '🎯',
+    color:  'border-sky-400 dark:border-sky-600',
+    accent: 'bg-sky-400',
+  },
+  {
     id:     'inicio',
     label:  'Contrato Assinado',
     desc:   'Aguardando início da implantação',
@@ -58,7 +66,26 @@ const STAGES: KanbanStage[] = [
     color:  'border-emerald-400 dark:border-emerald-600',
     accent: 'bg-emerald-400',
   },
+  {
+    id:     'cancelado',
+    label:  'Cancelado',
+    desc:   'Desistiu da contratação',
+    emoji:  '❌',
+    color:  'border-red-300 dark:border-red-700',
+    accent: 'bg-red-400',
+  },
 ]
+
+// Implantação automática por estágio
+const STAGE_IMPLANTACAO: Record<string, number> = {
+  captacao:       0,
+  inicio:         10,
+  configurando:   25,
+  treinamento:    50,
+  primeiro_acesso: 75,
+  operacional:    100,
+  cancelado:      0,
+}
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -87,7 +114,6 @@ export default function OnboardingKanbanPage() {
     const { data } = await supabase
       .from('tenants')
       .select('id, nome_franquia, codigo_cp, plano, score, implantacao, responsavel, kanban_stage, situacao, created_at')
-      .neq('situacao', 'cancelado')
       .eq('ativo', true)
       .order('nome_franquia')
     setCards((data ?? []) as KanbanCard[])
@@ -97,15 +123,20 @@ export default function OnboardingKanbanPage() {
   useEffect(() => { fetchCards() }, [fetchCards])
 
   async function moveCard(id: string, stage: string) {
-    setCards(prev => prev.map(c => c.id === id ? { ...c, kanban_stage: stage } : c))
-    const { error } = await supabase
-      .from('tenants')
-      .update({ kanban_stage: stage })
-      .eq('id', id)
-    if (error) {
-      toast.error('Erro ao mover card.')
-      fetchCards()
-    }
+    const novaImplantacao = STAGE_IMPLANTACAO[stage] ?? undefined
+    const updatePayload: Record<string, unknown> = { kanban_stage: stage }
+    if (novaImplantacao !== undefined) updatePayload.implantacao = novaImplantacao
+    // Cancelado muda situacao também
+    if (stage === 'cancelado') updatePayload.situacao = 'cancelado'
+    // Saindo do cancelado → volta para negociação
+    if (stage === 'captacao') updatePayload.situacao = 'negociacao'
+
+    setCards(prev => prev.map(c => c.id === id
+      ? { ...c, kanban_stage: stage, implantacao: novaImplantacao ?? c.implantacao }
+      : c
+    ))
+    const { error } = await supabase.from('tenants').update(updatePayload).eq('id', id)
+    if (error) { toast.error('Erro ao mover card.'); fetchCards() }
   }
 
   async function updateImplantacao(id: string, value: number) {

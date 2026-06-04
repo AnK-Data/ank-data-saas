@@ -18,10 +18,9 @@ import { loadAdminColors } from '../../pages/admin/AdminConfigPage'
 // ─── Itens de menu base ───────────────────────────────────────────────────────
 
 const BASE_NAV = [
-  { to: '/admin-ank',            icon: HomeIcon,               label: 'Dashboard',    slug: 'dashboard',   end: true },
-  { to: '/admin-ank/licenses',   icon: DocumentCheckIcon,      label: 'Planos',       slug: 'licenses'             },
-  { to: '/admin-ank/users',      icon: UsersIcon,              label: 'Usuários',     slug: 'users'                },
-  { to: '/admin-ank/compliance', icon: ShieldCheckIcon,        label: 'Conformidade', slug: 'compliance'           },
+  { to: '/admin-ank',            icon: HomeIcon,          label: 'Dashboard', slug: 'dashboard', end: true },
+  { to: '/admin-ank/licenses',   icon: DocumentCheckIcon, label: 'Módulos',    slug: 'licenses'              },
+  { to: '/admin-ank/users',      icon: UsersIcon,         label: 'Usuários',   slug: 'users'                 },
 ]
 // Franquias (/admin-ank/tenants) foi absorvida pela Lista em Clientes
 

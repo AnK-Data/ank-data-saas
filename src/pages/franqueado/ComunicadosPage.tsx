@@ -13,13 +13,33 @@ import { LojasService, type Loja } from '../../services/lojas.service'
 import { PAPEL_LABELS } from '../../types'
 import { supabase } from '../../lib/supabaseClient'
 
-async function abrirAnexo(url: string) {
-  if (url.startsWith('http')) { window.open(url, '_blank'); return }
+async function abrirAnexo(urlOrPath: string) {
+  let storagePath = urlOrPath
+  const publicMarker = '/object/public/admin-assets/'
+  const signMarker   = '/object/sign/admin-assets/'
+  if (urlOrPath.includes(publicMarker)) {
+    storagePath = urlOrPath.split(publicMarker)[1].split('?')[0]
+  } else if (urlOrPath.includes(signMarker)) {
+    storagePath = urlOrPath.split(signMarker)[1].split('?')[0]
+  } else if (urlOrPath.startsWith('http') && !urlOrPath.includes('supabase.co')) {
+    window.open(urlOrPath, '_blank', 'noopener,noreferrer')
+    return
+  }
+  const EXPIRY_48H = 48 * 60 * 60
+
   const { data, error } = await supabase.storage
     .from('admin-assets')
-    .createSignedUrl(url, 3600)
-  if (error || !data?.signedUrl) { alert('Erro ao abrir anexo.'); return }
-  window.open(data.signedUrl, '_blank')
+    .createSignedUrl(storagePath, EXPIRY_48H)
+
+  if (error || !data?.signedUrl) {
+    const msg = error?.message?.includes('expired') || error?.message?.includes('not found')
+      ? 'Este anexo não está mais disponível. Contate o suporte AnK Data.'
+      : 'Não foi possível abrir o anexo. Tente novamente em instantes.'
+    toast(msg, { icon: '⚠️' })
+    return
+  }
+
+  window.open(data.signedUrl, '_blank', 'noopener,noreferrer')
 }
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
@@ -60,16 +80,20 @@ export default function ComunicadosPage() {
 
     const papel = profile?.papel ?? ''
 
-    const [{ data: comm }, { data: leituras }, { data: adminComm }] = await Promise.all([
+    const [{ data: comm }, { data: leituras }, { data: adminComm }, { data: adminLeituras }] = await Promise.all([
       // Comunicados internos da franquia
       ComunicadosService.list(tenantId, userId),
       ComunicadosService.getLidos(tenantId, userId),
-      // Comunicados da AnK Data (admin_comunicados publicados)
+      // Comunicados da AnK Data publicados
       supabase.from('admin_comunicados')
         .select('*')
         .eq('publicado', true)
         .order('created_at', { ascending: false })
         .limit(50),
+      // Leituras dos comunicados da AnK Data por este usuário
+      supabase.from('admin_comunicados_leitura')
+        .select('comunicado_id')
+        .eq('usuario_id', userId),
     ])
 
     // Filtra admin comunicados por destinatários (papel do usuário)
@@ -102,7 +126,11 @@ export default function ComunicadosPage() {
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
     setComunicados(todos)
-    setLidos(new Set((leituras ?? []).map((l: { comunicado_id: string }) => l.comunicado_id)))
+
+    // Monta set de lidos: IDs internos + IDs admin prefixados com "admin_"
+    const lidosInternos = (leituras ?? []).map((l: { comunicado_id: string }) => l.comunicado_id)
+    const lidosAdmin    = (adminLeituras ?? []).map((l: { comunicado_id: string }) => `admin_${l.comunicado_id}`)
+    setLidos(new Set([...lidosInternos, ...lidosAdmin]))
     setLoading(false)
   }
 
@@ -110,7 +138,20 @@ export default function ComunicadosPage() {
 
   async function marcarLido(id: string) {
     if (lidos.has(id)) return
-    await ComunicadosService.marcarLido(id, userId)
+
+    if (id.startsWith('admin_')) {
+      // Comunicado da AnK Data → registra em admin_comunicados_leitura
+      const realId = id.replace('admin_', '')
+      await supabase.from('admin_comunicados_leitura').upsert({
+        comunicado_id: realId,
+        usuario_id:    userId,
+        tenant_id:     tenantId,
+      }, { onConflict: 'comunicado_id,usuario_id' })
+    } else {
+      // Comunicado interno da franquia → tabela comunicados_leitura
+      await ComunicadosService.marcarLido(id, userId)
+    }
+
     setLidos(prev => new Set([...prev, id]))
   }
 

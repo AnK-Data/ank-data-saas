@@ -30,6 +30,10 @@ export default function FranchiseLayout() {
   const { profile }   = useAuth()
   const title         = PAGE_TITLES[pathname] ?? 'Painel Franqueado'
 
+  useEffect(() => {
+    document.title = `AnK Data — ${title}`
+  }, [title])
+
   // Exibe modal de aceite quando:
   // 1. Usuário é franqueado (não é ANK Data)
   // 2. Ainda não aceitou os termos (lgpd_aceito_em é null)

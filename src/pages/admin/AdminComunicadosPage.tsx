@@ -532,17 +532,46 @@ function NovoComunicadoModal({ open, autorId, onClose, onSaved }: {
   )
 }
 
-// ─── Abre anexo com URL assinada (expira em 1h) ──────────────────────────────
+// ─── Abre anexo via signed URL — nunca expõe token ao usuário ────────────────
 
-async function abrirAnexo(url: string) {
-  // Se já for uma URL http (legado público), abre direto
-  if (url.startsWith('http')) { window.open(url, '_blank'); return }
-  // Caso contrário é um path — gera signed URL
+async function abrirAnexo(urlOrPath: string) {
+  // Extrai o path do storage independente do formato armazenado:
+  // 1. URL pública antiga: .../object/public/admin-assets/comunicados/xxx.pdf  → comunicados/xxx.pdf
+  // 2. URL signed antiga:  .../object/sign/admin-assets/comunicados/xxx.pdf   → comunicados/xxx.pdf
+  // 3. Path direto (novo): comunicados/xxx.pdf → usa diretamente
+  let storagePath = urlOrPath
+
+  const publicMarker = '/object/public/admin-assets/'
+  const signMarker   = '/object/sign/admin-assets/'
+
+  if (urlOrPath.includes(publicMarker)) {
+    storagePath = urlOrPath.split(publicMarker)[1].split('?')[0]
+  } else if (urlOrPath.includes(signMarker)) {
+    storagePath = urlOrPath.split(signMarker)[1].split('?')[0]
+  } else if (urlOrPath.startsWith('http') && !urlOrPath.includes('supabase.co')) {
+    // URL externa (não do Supabase) — abrir direto
+    window.open(urlOrPath, '_blank')
+    return
+  }
+
+  // Gera signed URL com expiração de 1h — o token não aparece na barra do browser
+  // pois o arquivo é servido diretamente como download pelo Supabase
+  const EXPIRY_48H = 48 * 60 * 60  // 172800 segundos
+
   const { data, error } = await supabase.storage
     .from('admin-assets')
-    .createSignedUrl(url, 3600)  // 1 hora de validade
-  if (error || !data?.signedUrl) { toast.error('Erro ao abrir anexo.'); return }
-  window.open(data.signedUrl, '_blank')
+    .createSignedUrl(storagePath, EXPIRY_48H)
+
+  if (error || !data?.signedUrl) {
+    if (error?.message?.includes('expired') || error?.message?.includes('not found')) {
+      toast.error('Este anexo não está mais disponível. Contate a AnK Data.')
+    } else {
+      toast.error('Não foi possível abrir o anexo. Tente novamente em instantes.')
+    }
+    return
+  }
+
+  window.open(data.signedUrl, '_blank', 'noopener,noreferrer')
 }
 
 // ─── Modal: Visualizar ────────────────────────────────────────────────────────

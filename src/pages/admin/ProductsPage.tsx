@@ -21,8 +21,7 @@ export default function ProductsPage() {
 
   const {
     products, total, page, pageSize, loading,
-    filters, filterOpts,
-    applyFilters, resetFilters, changePage, changePageSize, reload,
+    filters, applyFilters, changePage, changePageSize, reload,
   } = useProducts()
 
   return (
@@ -67,9 +66,7 @@ export default function ProductsPage() {
           <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5">
             <ProductFiltersComponent
               filters={filters}
-              options={filterOpts}
               onApply={applyFilters}
-              onReset={resetFilters}
             />
           </div>
 

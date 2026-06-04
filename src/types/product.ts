@@ -22,19 +22,21 @@ export interface Product {
 }
 
 export interface ProductFilters {
-  search:        string
+  search:          string
+  marca_estrutura: string   // BOT | EUD | OUI | QDB — código principal da marca
+  linha:           string
+  secao:           string
+  // campos não usados nos filtros mas mantidos para compatibilidade
   marca:         string
-  linha:         string
   familia:       string
-  secao:         string
   grupo:         string
   subgrupo:      string
   fora_de_linha: string
 }
 
 export const EMPTY_FILTERS: ProductFilters = {
-  search: '', marca: '', linha: '', familia: '',
-  secao: '', grupo: '', subgrupo: '', fora_de_linha: '',
+  search: '', marca_estrutura: '', linha: '', secao: '',
+  marca: '', familia: '', grupo: '', subgrupo: '', fora_de_linha: '',
 }
 
 export interface ProductFilterOptions {

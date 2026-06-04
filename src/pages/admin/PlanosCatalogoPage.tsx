@@ -7,7 +7,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Spinner from '../../components/ui/Spinner'
 
-interface PlanoCatalogo {
+interface MóduloCatalogo {
   id: string
   nome: string
   descricao: string | null
@@ -20,45 +20,45 @@ interface PlanoCatalogo {
 const brl = (v: number | null) =>
   v == null ? 'Sob consulta' : `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
 
-export default function PlanosCatalogoPage() {
-  const [planos, setPlanos]       = useState<PlanoCatalogo[]>([])
+export default function MódulosCatalogoPage() {
+  const [módulos, setMódulos]       = useState<MóduloCatalogo[]>([])
   const [loading, setLoading]     = useState(true)
-  const [editing, setEditing]     = useState<PlanoCatalogo | null>(null)
+  const [editing, setEditing]     = useState<MóduloCatalogo | null>(null)
   const [creating, setCreating]   = useState(false)
   const [toggling, setToggling]   = useState<string | null>(null)
 
-  async function fetchPlanos() {
+  async function fetchMódulos() {
     const { data } = await supabase
       .from('planos_catalogo')
       .select('*')
       .order('preco_mensal', { ascending: true, nullsFirst: false })
-    setPlanos((data ?? []) as PlanoCatalogo[])
+    setMódulos((data ?? []) as MóduloCatalogo[])
     setLoading(false)
   }
 
-  useEffect(() => { fetchPlanos() }, [])
+  useEffect(() => { fetchMódulos() }, [])
 
-  async function toggleAtivo(p: PlanoCatalogo) {
+  async function toggleAtivo(p: MóduloCatalogo) {
     setToggling(p.id)
     await supabase.from('planos_catalogo').update({ ativo: !p.ativo }).eq('id', p.id)
-    toast.success(p.ativo ? 'Plano desativado.' : 'Plano ativado.')
-    await fetchPlanos()
+    toast.success(p.ativo ? 'Módulo desativado.' : 'Módulo ativado.')
+    await fetchMódulos()
     setToggling(null)
   }
 
   if (loading) return <Spinner fullScreen />
 
-  const ativos   = planos.filter(p => p.ativo).length
-  const mrrTotal = planos.filter(p => p.ativo && p.preco_mensal).reduce((s, p) => s + (p.preco_mensal ?? 0), 0)
+  const ativos   = módulos.filter(p => p.ativo).length
+  const mrrTotal = módulos.filter(p => p.ativo && p.preco_mensal).reduce((s, p) => s + (p.preco_mensal ?? 0), 0)
 
   return (
     <>
       {/* Resumo */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Planos ativos',    value: ativos,                   color: 'text-emerald-600' },
-          { label: 'Planos no catálogo', value: planos.length,          color: 'text-slate-800 dark:text-slate-100' },
-          { label: 'MRR soma planos',  value: brl(mrrTotal || null),    color: 'text-violet-600' },
+          { label: 'Módulos ativos',    value: ativos,                   color: 'text-emerald-600' },
+          { label: 'Módulos no catálogo', value: módulos.length,          color: 'text-slate-800 dark:text-slate-100' },
+          { label: 'MRR soma módulos',  value: brl(mrrTotal || null),    color: 'text-violet-600' },
         ].map(s => (
           <div key={s.label} className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5">
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
@@ -70,11 +70,11 @@ export default function PlanosCatalogoPage() {
       <Card padding={false}>
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
           <CardHeader
-            title="Catálogo de Planos"
-            subtitle="Defina os planos disponíveis para as franquias"
+            title="Catálogo de Módulos"
+            subtitle="Defina os módulos disponíveis para as franquias"
             action={
               <Button size="sm" leftIcon={<PlusIcon className="h-4 w-4" />} onClick={() => setCreating(true)}>
-                Novo Plano
+                Novo Módulo
               </Button>
             }
           />
@@ -84,7 +84,7 @@ export default function PlanosCatalogoPage() {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-700">
               <tr className="text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                <th className="px-6 py-3">Plano</th>
+                <th className="px-6 py-3">Módulo</th>
                 <th className="px-6 py-3">Descrição</th>
                 <th className="px-6 py-3 text-right">Mensalidade</th>
                 <th className="px-6 py-3 text-right">Setup</th>
@@ -93,9 +93,9 @@ export default function PlanosCatalogoPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 dark:divide-slate-800">
-              {planos.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400">Nenhum plano cadastrado.</td></tr>
-              ) : planos.map(p => (
+              {módulos.length === 0 ? (
+                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400">Nenhum módulo cadastrado.</td></tr>
+              ) : módulos.map(p => (
                 <tr key={p.id} className={`transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 ${!p.ativo ? 'opacity-50' : ''}`}>
                   <td className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">{p.nome}</td>
                   <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs max-w-xs">{p.descricao ?? '—'}</td>
@@ -129,10 +129,10 @@ export default function PlanosCatalogoPage() {
       </Card>
 
       {(creating || editing) && (
-        <PlanoModal
+        <MóduloModal
           initial={editing}
           onClose={() => { setCreating(false); setEditing(null) }}
-          onSaved={async () => { setCreating(false); setEditing(null); setLoading(true); await fetchPlanos() }}
+          onSaved={async () => { setCreating(false); setEditing(null); setLoading(true); await fetchMódulos() }}
         />
       )}
     </>
@@ -141,8 +141,8 @@ export default function PlanosCatalogoPage() {
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
 
-function PlanoModal({ initial, onClose, onSaved }: {
-  initial: PlanoCatalogo | null; onClose: () => void; onSaved: () => void
+function MóduloModal({ initial, onClose, onSaved }: {
+  initial: MóduloCatalogo | null; onClose: () => void; onSaved: () => void
 }) {
   const [nome,         setNome]         = useState(initial?.nome ?? '')
   const [descricao,    setDescricao]    = useState(initial?.descricao ?? '')
@@ -165,7 +165,7 @@ function PlanoModal({ initial, onClose, onSaved }: {
         ? await supabase.from('planos_catalogo').update(payload).eq('id', initial.id)
         : await supabase.from('planos_catalogo').insert(payload)
       if (error) throw error
-      toast.success(initial ? 'Plano atualizado.' : 'Plano criado.')
+      toast.success(initial ? 'Módulo atualizado.' : 'Módulo criado.')
       onSaved()
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar.')
@@ -178,19 +178,19 @@ function PlanoModal({ initial, onClose, onSaved }: {
         ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 dark:border-slate-800">
           <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-            {initial ? `Editar — ${initial.nome}` : 'Novo Plano'}
+            {initial ? `Editar — ${initial.nome}` : 'Novo Módulo'}
           </h2>
           <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-          <Input label="Nome do Plano *" value={nome} onChange={e => setNome(e.target.value)} required
+          <Input label="Nome do Módulo *" value={nome} onChange={e => setNome(e.target.value)} required
             placeholder="Ex: Starter, Pro, Enterprise" />
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Descrição</label>
             <textarea value={descricao} onChange={e => setDescricao(e.target.value)} rows={2}
-              placeholder="O que está incluído neste plano..."
+              placeholder="O que está incluído neste módulo..."
               className="block w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800
                 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm resize-none" />
           </div>
@@ -220,7 +220,7 @@ function PlanoModal({ initial, onClose, onSaved }: {
           <div className="flex gap-3 pt-1">
             <Button variant="secondary" onClick={onClose} disabled={saving} className="flex-1">Cancelar</Button>
             <Button type="submit" loading={saving} className="flex-1">
-              {initial ? 'Salvar' : 'Criar Plano'}
+              {initial ? 'Salvar' : 'Criar Módulo'}
             </Button>
           </div>
         </form>

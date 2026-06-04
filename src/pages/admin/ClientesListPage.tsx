@@ -3,8 +3,9 @@ import { parseISO, differenceInDays } from 'date-fns'
 import {
   MagnifyingGlassIcon, TableCellsIcon, ViewColumnsIcon,
   ArrowPathIcon, PencilSquareIcon, ArrowTopRightOnSquareIcon,
-  PlusIcon,
+  DocumentArrowDownIcon, PlusIcon,
 } from '@heroicons/react/24/outline'
+import { gerarOrcamentoPDF } from './gerarOrcamento'
 import toast from 'react-hot-toast'
 import { supabase } from '../../lib/supabaseClient'
 import Card from '../../components/ui/Card'
@@ -14,7 +15,7 @@ import ClienteModal from './ClienteModal'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-export type Situacao  = 'trial' | 'vigente' | 'cancelado' | 'suspenso'
+export type Situacao  = 'trial' | 'negociacao' | 'vigente' | 'cancelado' | 'suspenso'
 export type Score     = 'risco' | 'atencao' | 'normal' | 'otimo'
 export type ViewMode  = 'tabela' | 'kanban'
 
@@ -32,6 +33,12 @@ export interface Cliente {
   obs: string | null
   ativo: boolean
   created_at: string
+  google_drive_folder_id?: string | null
+  // Módulos e financeiro
+  modulos_ids?: string[]
+  desconto?: number
+  desconto_setup?: number
+  setup_total?: number
   // computed
   last_upload?: string | null
   n_usuarios?: number
@@ -50,10 +57,11 @@ export const SCORE_CONFIG: Record<Score, { label: string; dot: string; badge: st
 }
 
 export const SITUACAO_CONFIG: Record<Situacao, { label: string; badge: string }> = {
-  trial:     { label: 'Em trial',   badge: 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400'             },
-  vigente:   { label: 'Vigente',    badge: 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400' },
-  cancelado: { label: 'Cancelado',  badge: 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/30 dark:text-red-400'                  },
-  suspenso:  { label: 'Suspenso',   badge: 'bg-slate-100 text-slate-600 ring-slate-300 dark:bg-slate-800 dark:text-slate-400'           },
+  trial:       { label: 'Em teste',    badge: 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/30 dark:text-blue-400'               },
+  negociacao:  { label: 'Negociação',  badge: 'bg-violet-50 text-violet-700 ring-violet-200 dark:bg-violet-950/30 dark:text-violet-400'     },
+  vigente:     { label: 'Vigente',     badge: 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400' },
+  cancelado:   { label: 'Cancelado',   badge: 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/30 dark:text-red-400'                    },
+  suspenso:    { label: 'Suspenso',    badge: 'bg-slate-100 text-slate-600 ring-slate-300 dark:bg-slate-800 dark:text-slate-400'             },
 }
 
 type FiltroSituacao = 'todos' | Situacao
@@ -125,7 +133,7 @@ export default function ClientesListPage() {
             { label: 'Total de Clientes',  value: clientes.length,             color: 'text-slate-800 dark:text-slate-100' },
             { label: 'Em Trial',           value: counts.trial,                color: 'text-blue-600'   },
             { label: 'Vigentes',           value: counts.vigente,              color: 'text-emerald-600'},
-            { label: 'MRR Total',
+            { label: 'Receita Mensal Total',
               value: `R$ ${mrrTotal.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`,
               color: 'text-violet-600' },
           ].map(s => (
@@ -237,8 +245,8 @@ function TabelaView({ clientes, onEdit, onRefresh }: {
               <th className="px-5 py-3">Score</th>
               <th className="px-5 py-3">Implantação</th>
               <th className="px-5 py-3">Trial</th>
-              <th className="px-5 py-3">Plano</th>
-              <th className="px-5 py-3">MRR</th>
+              <th className="px-5 py-3">Módulos</th>
+              <th className="px-5 py-3">R/mês</th>
               <th className="px-5 py-3">Situação</th>
               <th className="px-5 py-3 text-right">Ações</th>
             </tr>
@@ -336,11 +344,43 @@ function TabelaView({ clientes, onEdit, onRefresh }: {
                   {/* Ações */}
                   <td className="px-5 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => onEdit(c)}
+                      <button onClick={() => onEdit(c)} title="Editar"
                         className="p-1.5 rounded-lg text-slate-400 hover:text-ank-600 hover:bg-ank-50 dark:hover:bg-ank-950/30 transition-colors">
                         <PencilSquareIcon className="h-4 w-4" />
                       </button>
-                      <button
+                      <button title="Gerar orçamento PDF"
+                        onClick={async () => {
+                          if (!c.modulos_ids?.length) {
+                            toast('Selecione os módulos editando o cliente primeiro.', { icon: '💡' })
+                            onEdit(c); return
+                          }
+                          // Busca detalhes dos módulos
+                          const { data: mods } = await supabase
+                            .from('planos_catalogo')
+                            .select('id, nome, preco_mensal, preco_setup')
+                            .in('id', c.modulos_ids)
+                          const modulos = (mods ?? []) as { id: string; nome: string; preco_mensal: number | null; preco_setup: number | null }[]
+                          const subtotalMensal = modulos.reduce((s, m) => s + (m.preco_mensal ?? 0), 0)
+                          const subtotalSetup  = modulos.reduce((s, m) => s + (m.preco_setup ?? 0), 0)
+                          const desc    = c.desconto ?? 0
+                          const descSet = c.desconto_setup ?? 0
+                          gerarOrcamentoPDF({
+                            nomeFranquia: c.nome_franquia,
+                            codigoCp: c.codigo_cp ?? undefined,
+                            responsavel: c.responsavel ?? undefined,
+                            modulos,
+                            subtotalMensal,
+                            descontoMensal: desc,
+                            mensalidadeFinal: Math.max(0, subtotalMensal - desc),
+                            subtotalSetup,
+                            descontoSetup: descSet,
+                            setupFinal: Math.max(0, subtotalSetup - descSet),
+                          })
+                        }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950/30 transition-colors">
+                        <DocumentArrowDownIcon className="h-4 w-4" />
+                      </button>
+                      <button title="Ver painel"
                         className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                       </button>

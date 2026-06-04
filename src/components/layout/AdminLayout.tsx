@@ -1,11 +1,12 @@
 import { Outlet, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import AdminSidebar from './AdminSidebar'
 import AdminHeader from './AdminHeader'
 
 const pageTitles: Record<string, string> = {
   '/admin-ank':                 'Dashboard',
   '/admin-ank/tenants':         'Gerenciamento de Franquias',
-  '/admin-ank/licenses':        'Catálogo de Planos',
+  '/admin-ank/licenses':        'Catálogo de Módulos',
   '/admin-ank/licenses/legacy': 'Licenças (Legado)',
   '/admin-ank/users':           'Usuários',
   '/admin-ank/compliance':      'Monitor de Conformidade',
@@ -25,6 +26,10 @@ const pageTitles: Record<string, string> = {
 export default function AdminLayout() {
   const { pathname } = useLocation()
   const title = pageTitles[pathname] ?? 'Painel Administrativo'
+
+  useEffect(() => {
+    document.title = `AnK Data — ${title}`
+  }, [title])
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-200">

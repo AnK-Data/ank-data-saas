@@ -3,16 +3,22 @@ import { format, parseISO, formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
   BellAlertIcon, ExclamationTriangleIcon, MegaphoneIcon,
-  ArrowPathIcon, EyeIcon, EyeSlashIcon, UsersIcon,
+  ArrowPathIcon, EyeIcon, EyeSlashIcon, UsersIcon, ShieldCheckIcon, ExclamationCircleIcon,
 } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 import { supabase } from '../../lib/supabaseClient'
+import { ComplianceService } from '../../services/compliance.service'
+import { TenantsService } from '../../services/tenants.service'
 import Card, { CardHeader } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Spinner from '../../components/ui/Spinner'
+import type { TenantCompliance, UploadLog, Tenant } from '../../types'
+
+type UploadRow = UploadLog & { tenant?: { nome_franquia?: string } }
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-type Tab = 'sistema' | 'anuncios'
+type Tab = 'sistema' | 'anuncios' | 'conformidade'
 
 interface TenantAlert {
   tenant_id: string
@@ -47,6 +53,10 @@ export default function AdminNotificacoesPage() {
   // Anúncios
   const [comunicados, setComunicados] = useState<AdminComunicado[]>([])
   const [totalTenants, setTotalTenants] = useState(0)
+
+  // Conformidade
+  const [compliance, setCompliance] = useState<TenantCompliance[]>([])
+  const [uploadLogs, setUploadLogs] = useState<UploadRow[]>([])
 
   async function loadSistema(isRefresh = false) {
     if (isRefresh) setRefreshing(true)
@@ -133,18 +143,40 @@ export default function AdminNotificacoesPage() {
     setComunicados(enriched)
   }
 
+  async function loadConformidade() {
+    const [complianceRes, logsRes, tenantsRes] = await Promise.all([
+      ComplianceService.check(),
+      ComplianceService.recentLogs(50),
+      TenantsService.list(),
+    ])
+    if (!complianceRes.error) {
+      const tenantMap = new Map(((tenantsRes.data ?? []) as Tenant[]).map(t => [t.id, t]))
+      const merged = ((complianceRes.data ?? []) as TenantCompliance[]).map(c => ({
+        ...c,
+        codigo_cp: tenantMap.get(c.tenant_id)?.codigo_cp ?? null,
+      }))
+      setCompliance(merged)
+    } else {
+      toast.error('Erro ao carregar conformidade.')
+    }
+    if (!logsRes.error && logsRes.data) setUploadLogs(logsRes.data as UploadRow[])
+  }
+
   async function loadAll(isRefresh = false) {
     if (!isRefresh) setLoading(true)
-    await Promise.all([loadSistema(isRefresh), loadAnuncios()])
+    await Promise.all([loadSistema(isRefresh), loadAnuncios(), loadConformidade()])
     if (!isRefresh) setLoading(false)
     if (isRefresh) setRefreshing(false)
   }
 
   useEffect(() => { loadAll() }, [totalTenants])
 
+  const comprometidas = compliance.filter(c => c.compliance_status === 'COMPROMETIDO')
+
   const TABS = [
-    { id: 'sistema',  icon: ExclamationTriangleIcon, label: 'Sistema',   count: alertas.length },
-    { id: 'anuncios', icon: MegaphoneIcon,           label: 'Anúncios',  count: comunicados.length },
+    { id: 'sistema',      icon: ExclamationTriangleIcon, label: 'Sistema',      count: alertas.length },
+    { id: 'anuncios',     icon: MegaphoneIcon,           label: 'Anúncios',     count: comunicados.length },
+    { id: 'conformidade', icon: ShieldCheckIcon,         label: 'Conformidade', count: comprometidas.length },
   ] as const
 
   if (loading) return <Spinner fullScreen />
@@ -328,6 +360,125 @@ export default function AdminNotificacoesPage() {
             </div>
           )}
         </Card>
+      )}
+
+      {/* ── ABA CONFORMIDADE ─────────────────────────────────────────── */}
+      {tab === 'conformidade' && (
+        <div className="space-y-4">
+          {/* Banner comprometidas */}
+          {comprometidas.length > 0 && (
+            <div className="flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-5 py-4">
+              <ExclamationCircleIcon className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+              <div>
+                <p className="text-sm font-semibold text-red-800 dark:text-red-400">
+                  {comprometidas.length} franquia{comprometidas.length !== 1 ? 's' : ''} em situação COMPROMETIDA
+                </p>
+                <p className="mt-0.5 text-xs text-red-600 dark:text-red-500">
+                  Mais de 7 dias sem envio de arquivo de vendas.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Tabela conformidade */}
+          <Card padding={false}>
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
+              <CardHeader
+                title="Monitor de Conformidade"
+                subtitle={`${compliance.filter(c => c.compliance_status === 'OK').length} conformes · ${comprometidas.length} comprometidas`}
+              />
+              <Button variant="secondary" size="sm" loading={refreshing}
+                leftIcon={<ArrowPathIcon className="h-4 w-4" />}
+                onClick={() => loadAll(true)}>
+                Atualizar
+              </Button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+                  <tr className="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                    <th className="px-6 py-3">Status</th>
+                    <th className="px-6 py-3">Franquia</th>
+                    <th className="px-6 py-3">Código CP</th>
+                    <th className="px-6 py-3">Último Upload</th>
+                    <th className="px-6 py-3 text-right">Dias sem Upload</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                  {compliance.length === 0 ? (
+                    <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 dark:text-slate-500">
+                      Nenhum dado disponível.
+                    </td></tr>
+                  ) : [...comprometidas, ...compliance.filter(c => c.compliance_status === 'OK')].map(c => (
+                    <tr key={c.tenant_id}
+                      className={`transition-colors ${c.compliance_status === 'COMPROMETIDO'
+                        ? 'bg-red-50/40 dark:bg-red-950/10 hover:bg-red-50 dark:hover:bg-red-950/20'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
+                      <td className="px-6 py-4">
+                        {c.compliance_status === 'OK'
+                          ? <span className="flex items-center gap-2"><span>🟢</span><span className="text-emerald-700 dark:text-emerald-400 font-medium">CONFORME</span></span>
+                          : <span className="flex items-center gap-2"><span>🔴</span><span className="text-red-700 dark:text-red-400 font-medium">COMPROMETIDO</span></span>}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">{c.tenant_name}</td>
+                      <td className="px-6 py-4">
+                        {(c as TenantCompliance & { codigo_cp?: string }).codigo_cp
+                          ? <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">{(c as TenantCompliance & { codigo_cp?: string }).codigo_cp}</span>
+                          : <span className="text-slate-400 text-xs">—</span>}
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs">
+                        {c.last_upload_date
+                          ? format(parseISO(c.last_upload_date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+                          : <span className="italic text-slate-400">Nunca realizou upload</span>}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {c.days_since_upload !== null
+                          ? <span className={`font-semibold ${c.days_since_upload > 7 ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                              {c.days_since_upload}d
+                            </span>
+                          : <span className="text-slate-400">—</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          {/* Histórico uploads */}
+          <Card padding={false}>
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/60">
+              <CardHeader title="Histórico de Uploads" subtitle="Últimos 50 arquivos enviados" />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+                  <tr className="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                    <th className="px-6 py-3">Franquia</th>
+                    <th className="px-6 py-3">Arquivo</th>
+                    <th className="px-6 py-3 text-right">Data do Upload</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                  {uploadLogs.length === 0 ? (
+                    <tr><td colSpan={3} className="px-6 py-10 text-center text-slate-400 dark:text-slate-500">Nenhum upload registrado.</td></tr>
+                  ) : uploadLogs.map(log => (
+                    <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="px-6 py-3.5 font-medium text-slate-800 dark:text-slate-200">
+                        {(log.tenant as { nome_franquia?: string })?.nome_franquia ?? log.tenant_id}
+                      </td>
+                      <td className="px-6 py-3.5 font-mono text-xs text-slate-600 dark:text-slate-400 max-w-[240px] truncate">
+                        {log.nome_arquivo}
+                      </td>
+                      <td className="px-6 py-3.5 text-right text-slate-500 dark:text-slate-400 text-xs">
+                        {format(parseISO(log.data_upload), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
       )}
     </div>
   )
