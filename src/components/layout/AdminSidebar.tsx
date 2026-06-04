@@ -7,7 +7,7 @@ import {
   ShieldCheckIcon, UsersIcon, Cog6ToothIcon, Bars3Icon,
   ChevronDownIcon, ChevronRightIcon, ArrowRightStartOnRectangleIcon,
   UserGroupIcon, ListBulletIcon, ViewColumnsIcon, ArchiveBoxIcon,
-  MegaphoneIcon, BellAlertIcon,
+  MegaphoneIcon, BellAlertIcon, ScaleIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import AnkLogo from '../AnkLogo'
@@ -192,8 +192,9 @@ export default function AdminSidebar() {
           </p>
           <ul className="space-y-0.5">
             {[
-              { to: '/admin-ank/comunicados',   icon: MegaphoneIcon,  label: 'Comunicados'   },
-              { to: '/admin-ank/notificacoes',  icon: BellAlertIcon,  label: 'Notificações'  },
+              { to: '/admin-ank/comunicados',       icon: MegaphoneIcon,  label: 'Comunicados'        },
+              { to: '/admin-ank/notificacoes',      icon: BellAlertIcon,  label: 'Notificações'       },
+              { to: '/admin-ank/documentos-legais', icon: ScaleIcon,      label: 'Documentos Legais'  },
             ].map(({ to, icon: Icon, label }) => (
               <li key={to}>
                 <NavLink to={to}

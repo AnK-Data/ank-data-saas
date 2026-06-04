@@ -192,9 +192,14 @@ export default function LoginPage() {
             </div>
           )}
 
-          <p className="mt-6 text-center text-xs text-slate-400 leading-relaxed">
+          <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
             Acesso concedido pela equipe AnK Data.<br />
-            <span className="text-slate-300">suporte@ankdata.com.br</span>
+            <span className="text-slate-300 dark:text-slate-600">suporte@ankdata.com.br</span>
+            <br />
+            <button onClick={() => navigate('/privacidade')}
+              className="mt-1 text-slate-400 dark:text-slate-500 hover:text-ank-600 dark:hover:text-ank-400 underline text-[11px]">
+              Política de Privacidade
+            </button>
           </p>
         </div>
       </div>

@@ -20,6 +20,7 @@ export default function PrimeiroAcessoPage() {
   const [password, setPassword]       = useState('')
   const [confirm, setConfirm]         = useState('')
   const [showPass, setShowPass]       = useState(false)
+  const [aceitouTermos, setAceitouTermos] = useState(false)
   const [saving, setSaving]           = useState(false)
   const [error, setError]             = useState('')
 
@@ -57,6 +58,9 @@ export default function PrimeiroAcessoPage() {
     if (password !== confirm) {
       setError('As senhas não coincidem.'); return
     }
+    if (!aceitouTermos) {
+      setError('Você precisa aceitar a Política de Privacidade para continuar.'); return
+    }
     if (!colaborador) return
 
     setSaving(true)
@@ -85,13 +89,15 @@ export default function PrimeiroAcessoPage() {
 
       // Atualiza o perfil com dados do Ingresse
       await supabase.from('profiles').update({
-        nome:          colaborador.nome,
-        usuario_extranet: ingresseId.trim(),
-        tenant_id:     colaborador.tenant_id,
-        cargo_ingresse: colaborador.cargo,
-        tipo_usuario:  'ingresse',
-        status:        'Ativo',
-        first_access:  false,
+        nome:               colaborador.nome,
+        usuario_extranet:   ingresseId.trim(),
+        tenant_id:          colaborador.tenant_id,
+        cargo_ingresse:     colaborador.cargo,
+        tipo_usuario:       'ingresse',
+        status:             'Ativo',
+        first_access:       false,
+        lgpd_aceito_em:     new Date().toISOString(),
+        lgpd_versao:        '1.0',
       }).eq('id', signUpData.user.id)
 
       toast.success('Senha criada! Bem-vindo(a) à plataforma.')
@@ -208,6 +214,27 @@ export default function PrimeiroAcessoPage() {
                 </div>
               </div>
 
+              {/* Aceite LGPD */}
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" checked={aceitouTermos}
+                  onChange={e => setAceitouTermos(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-slate-900 shrink-0" />
+                <span className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Li e aceito a{' '}
+                  <a href="/privacidade" target="_blank"
+                    className="text-ank-600 dark:text-ank-400 underline hover:no-underline">
+                    Política de Privacidade
+                  </a>
+                  {' '}e o tratamento dos meus dados pessoais (nome, CPF, cargo) pela AnK Data
+                  conforme a{' '}
+                  <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-ank-600 dark:text-ank-400 underline hover:no-underline">
+                    LGPD (Lei 13.709/2018)
+                  </a>.
+                </span>
+              </label>
+
               {error && (
                 <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 ring-1 ring-red-100">
                   {error}
@@ -216,7 +243,7 @@ export default function PrimeiroAcessoPage() {
 
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || !aceitouTermos}
                 className="w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? 'Criando conta…' : 'Criar senha e acessar'}

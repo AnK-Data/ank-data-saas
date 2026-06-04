@@ -17,8 +17,9 @@ const pageTitles: Record<string, string> = {
   '/admin-ank/configuracao':    'Configuração Global',
   '/admin-ank/configurar-menu': 'Organizar Menu',
   '/admin-ank/produtos':        'Base Mestre de Produtos',
-  '/admin-ank/comunicados':     'Comunicados',
-  '/admin-ank/notificacoes':    'Notificações',
+  '/admin-ank/comunicados':        'Comunicados',
+  '/admin-ank/notificacoes':       'Notificações',
+  '/admin-ank/documentos-legais':  'Documentos Legais — LGPD',
 }
 
 export default function AdminLayout() {

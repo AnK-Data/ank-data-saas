@@ -5,6 +5,7 @@ import { FranchiseRoute } from './FranchiseRoute'
 
 // Páginas públicas
 import LoginPage          from '../pages/auth/LoginPage'
+import PrivacidadePage    from '../pages/PrivacidadePage'
 import RegisterPage        from '../pages/auth/RegisterPage'
 import PrimeiroAcessoPage  from '../pages/auth/PrimeiroAcessoPage'
 import RedefinirSenhaPage  from '../pages/auth/RedefinirSenhaPage'
@@ -21,8 +22,9 @@ import CompliancePage       from '../pages/admin/CompliancePage'
 import AdminConfigPage      from '../pages/admin/AdminConfigPage'
 import PlanosCatalogoPage       from '../pages/admin/PlanosCatalogoPage'
 import ProductsPage             from '../pages/admin/ProductsPage'
-import AdminComunicadosPage     from '../pages/admin/AdminComunicadosPage'
-import AdminNotificacoesPage    from '../pages/admin/AdminNotificacoesPage'
+import AdminComunicadosPage        from '../pages/admin/AdminComunicadosPage'
+import AdminNotificacoesPage       from '../pages/admin/AdminNotificacoesPage'
+import AdminDocumentosLegaisPage   from '../pages/admin/AdminDocumentosLegaisPage'
 import AdminMenuPage        from '../pages/admin/AdminMenuPage'
 import ClientesListPage     from '../pages/admin/ClientesListPage'
 import OnboardingPage       from '../pages/admin/OnboardingPage'
@@ -51,6 +53,7 @@ export function AppRouter() {
       <Routes>
         {/* ── Públicas ───────────────────────────────────────────────── */}
         <Route path="/login"           element={<LoginPage />} />
+        <Route path="/privacidade"     element={<PrivacidadePage />} />
         <Route path="/register"        element={<RegisterPage />} />
         <Route path="/primeiro-acesso" element={<PrimeiroAcessoPage />} />
         <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
@@ -75,8 +78,9 @@ export function AppRouter() {
               <Route path="configuracao"    element={<AdminConfigPage />} />
               <Route path="configurar-menu" element={<AdminMenuPage />} />
               <Route path="produtos"        element={<ProductsPage />} />
-              <Route path="comunicados"     element={<AdminComunicadosPage />} />
-              <Route path="notificacoes"    element={<AdminNotificacoesPage />} />
+              <Route path="comunicados"        element={<AdminComunicadosPage />} />
+              <Route path="notificacoes"       element={<AdminNotificacoesPage />} />
+              <Route path="documentos-legais"  element={<AdminDocumentosLegaisPage />} />
             </Route>
           </Route>
         </Route>
