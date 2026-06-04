@@ -233,11 +233,28 @@ function NovoComunicadoModal({ open, autorId, onClose, onSaved }: {
     if (!files.length) return
     setUploading(true)
     for (const file of files) {
-      const path = `comunicados/${Date.now()}_${file.name}`
-      const { data, error } = await supabase.storage.from('admin-assets').upload(path, file)
-      if (error) { toast.error(`Erro ao enviar ${file.name}`); continue }
-      const { data: { publicUrl } } = supabase.storage.from('admin-assets').getPublicUrl(data.path)
-      setAnexos(prev => [...prev, { nome: file.name, url: publicUrl, tipo: file.type, tamanho: file.size }])
+      // Sanitiza o nome: remove acentos e caracteres especiais
+      const ext      = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : ''
+      const baseName = file.name
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')   // remove acentos
+        .replace(/\.[^.]+$/, '')                             // remove extensão
+        .replace(/[^a-zA-Z0-9]/g, '_')                      // substitui tudo que não for alfanum
+        .replace(/_+/g, '_').replace(/^_|_$/g, '')           // limpa underscores duplos/extremos
+      const safeName = `${baseName}.${ext}`
+      const path = `comunicados/${Date.now()}_${safeName}`
+
+      const { data, error } = await supabase.storage
+        .from('admin-assets')
+        .upload(path, file, { upsert: false, contentType: file.type })
+
+      if (error) {
+        console.error('[Storage] upload error:', error)
+        toast.error(`Erro ao enviar "${file.name}": ${error.message}`)
+        continue
+      }
+      // Armazena o PATH (não a URL pública) — URL assinada é gerada no momento do acesso
+      setAnexos(prev => [...prev, { nome: file.name, url: data.path, tipo: file.type, tamanho: file.size }])
+      toast.success(`${file.name} enviado!`)
     }
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -261,6 +278,11 @@ function NovoComunicadoModal({ open, autorId, onClose, onSaved }: {
         ? null
         : { papeis: perfisSelected }
 
+      // Inclui link pendente (se usuário digitou mas não clicou no +)
+      const linksFinais = linkUrl.trim()
+        ? [...links, { titulo: linkTitulo.trim() || linkUrl.trim(), url: linkUrl.trim() }]
+        : links
+
       const { error } = await supabase.from('admin_comunicados').insert({
         titulo:        titulo.trim(),
         mensagem:      mensagem.trim(),
@@ -268,7 +290,7 @@ function NovoComunicadoModal({ open, autorId, onClose, onSaved }: {
         autor_id:      autorId,
         destinatarios,
         anexos,
-        links,
+        links:         linksFinais,
         publicado:     publicar,
       })
       if (error) throw error
@@ -462,22 +484,31 @@ function NovoComunicadoModal({ open, autorId, onClose, onSaved }: {
 
         {/* Links */}
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Links</label>
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            Links
+            <span className="ml-2 text-xs font-normal text-slate-400 dark:text-slate-500">
+              (pressione Enter ou clique em + para adicionar)
+            </span>
+          </label>
           <div className="flex gap-2">
             <input value={linkTitulo} onChange={e => setLinkTitulo(e.target.value)}
-              placeholder="Título (opcional)"
+              placeholder="Título (ex: Acesse aqui)"
               className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800
-                text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:border-ank-400 focus:outline-none"
+                text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500
+                px-3 py-2 text-sm focus:border-ank-400 focus:outline-none"
             />
             <input value={linkUrl} onChange={e => setLinkUrl(e.target.value)}
-              placeholder="https://..."
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addLink() } }}
+              placeholder="https://exemplo.com.br"
               className="flex-[2] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800
-                text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:border-ank-400 focus:outline-none"
+                text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500
+                px-3 py-2 text-sm focus:border-ank-400 focus:outline-none"
             />
             <button type="button" onClick={addLink}
-              className="rounded-lg bg-slate-100 dark:bg-slate-700 px-3 py-2 text-sm font-medium
-                text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600">
-              <LinkIcon className="h-4 w-4" />
+              title="Adicionar link"
+              className="rounded-lg bg-ank-600 hover:bg-ank-700 px-4 py-2 text-sm font-bold text-white
+                transition-colors shrink-0">
+              +
             </button>
           </div>
           {links.length > 0 && (
@@ -499,6 +530,19 @@ function NovoComunicadoModal({ open, autorId, onClose, onSaved }: {
       </form>
     </Modal>
   )
+}
+
+// ─── Abre anexo com URL assinada (expira em 1h) ──────────────────────────────
+
+async function abrirAnexo(url: string) {
+  // Se já for uma URL http (legado público), abre direto
+  if (url.startsWith('http')) { window.open(url, '_blank'); return }
+  // Caso contrário é um path — gera signed URL
+  const { data, error } = await supabase.storage
+    .from('admin-assets')
+    .createSignedUrl(url, 3600)  // 1 hora de validade
+  if (error || !data?.signedUrl) { toast.error('Erro ao abrir anexo.'); return }
+  window.open(data.signedUrl, '_blank')
 }
 
 // ─── Modal: Visualizar ────────────────────────────────────────────────────────
@@ -529,11 +573,12 @@ function VisualizarModal({ comunicado, onClose }: { comunicado: AdminComunicado;
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Anexos</p>
             <div className="flex flex-wrap gap-2">
               {comunicado.anexos.map((a, i) => (
-                <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
+                <button key={i} onClick={() => abrirAnexo(a.url)} type="button"
                   className="flex items-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-800
-                    border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-ank-600 dark:text-ank-400 hover:underline">
+                    border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-ank-600 dark:text-ank-400
+                    hover:bg-ank-50 dark:hover:bg-ank-950/30 transition-colors">
                   <PaperClipIcon className="h-3.5 w-3.5" />{a.nome}
-                </a>
+                </button>
               ))}
             </div>
           </div>

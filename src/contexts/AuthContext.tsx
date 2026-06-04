@@ -48,7 +48,7 @@ async function fetchProfileWithTimeout(userId: string): Promise<Profile | null> 
     .eq('id', userId)
     .single()
     .then(({ data, error }) => {
-      if (error) { console.warn('[Auth] fetchProfile:', error.message); return null }
+      if (error) { console.warn('[Auth] fetchProfile: falha ao carregar perfil'); return null }
       return data as Profile
     })
 

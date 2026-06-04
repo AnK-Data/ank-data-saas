@@ -11,6 +11,16 @@ import { useAuth } from '../../contexts/AuthContext'
 import { ComunicadosService, type Comunicado, type TipoComunicado } from '../../services/comunicados.service'
 import { LojasService, type Loja } from '../../services/lojas.service'
 import { PAPEL_LABELS } from '../../types'
+import { supabase } from '../../lib/supabaseClient'
+
+async function abrirAnexo(url: string) {
+  if (url.startsWith('http')) { window.open(url, '_blank'); return }
+  const { data, error } = await supabase.storage
+    .from('admin-assets')
+    .createSignedUrl(url, 3600)
+  if (error || !data?.signedUrl) { alert('Erro ao abrir anexo.'); return }
+  window.open(data.signedUrl, '_blank')
+}
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -47,11 +57,51 @@ export default function ComunicadosPage() {
 
   async function fetchData() {
     if (!tenantId) return
-    const [{ data: comm }, { data: leituras }] = await Promise.all([
+
+    const papel = profile?.papel ?? ''
+
+    const [{ data: comm }, { data: leituras }, { data: adminComm }] = await Promise.all([
+      // Comunicados internos da franquia
       ComunicadosService.list(tenantId, userId),
       ComunicadosService.getLidos(tenantId, userId),
+      // Comunicados da AnK Data (admin_comunicados publicados)
+      supabase.from('admin_comunicados')
+        .select('*')
+        .eq('publicado', true)
+        .order('created_at', { ascending: false })
+        .limit(50),
     ])
-    setComunicados((comm ?? []) as Comunicado[])
+
+    // Filtra admin comunicados por destinatários (papel do usuário)
+    const adminFiltrados = ((adminComm ?? []) as {
+      id: string; titulo: string; mensagem: string; tipo: string
+      destinatarios: { papeis?: string[] } | null; created_at: string
+      anexos: { nome: string; url: string; tipo: string; tamanho: number }[]
+      links: { titulo: string; url: string }[]
+    }[]).filter(ac => {
+      if (!ac.destinatarios || !ac.destinatarios.papeis) return true  // null = todos
+      return ac.destinatarios.papeis.includes(papel)
+    }).map(ac => ({
+      id:        `admin_${ac.id}`,
+      titulo:    ac.titulo,
+      corpo:     ac.mensagem,
+      tipo:      (ac.tipo === 'informativo' ? 'info' : ac.tipo) as TipoComunicado,
+      tenant_id: tenantId,
+      autor_id:  '',
+      publicado: true,
+      created_at: ac.created_at,
+      // flags extras para renderização
+      _isAnkData: true,
+      _anexos: ac.anexos ?? [],
+      _links: ac.links ?? [],
+    } as Comunicado & { _isAnkData?: boolean; _anexos?: unknown[]; _links?: unknown[] }))
+
+    const todos = [
+      ...(comm ?? []) as Comunicado[],
+      ...adminFiltrados,
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+    setComunicados(todos)
     setLidos(new Set((leituras ?? []).map((l: { comunicado_id: string }) => l.comunicado_id)))
     setLoading(false)
   }
@@ -154,6 +204,12 @@ export default function ComunicadosPage() {
                     <Icon className={`h-5 w-5 ${cfg.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
+                    {(c as Comunicado & { _isAnkData?: boolean })._isAnkData && (
+                      <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold
+                        bg-ank-600 text-white mb-1">
+                        📢 AnK Data
+                      </span>
+                    )}
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
                       <span className={`text-[10px] font-bold uppercase tracking-wider ${cfg.color}`}>
                         {cfg.label}
@@ -205,34 +261,90 @@ export default function ComunicadosPage() {
       </div>
 
       {/* Modal: Visualizar comunicado */}
-      {viewing && (
-        <Modal open onClose={() => setViewing(null)} size="md"
-          title={viewing.titulo}
-          footer={<Button variant="secondary" onClick={() => setViewing(null)}>Fechar</Button>}
-        >
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className={`text-xs font-bold uppercase ${TIPO_CONFIG[viewing.tipo]?.color}`}>
-                {TIPO_CONFIG[viewing.tipo]?.label}
-              </span>
-              <span className="text-xs text-slate-400">·</span>
-              <span className="text-xs text-slate-400">
-                {format(parseISO(viewing.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-              </span>
-            </div>
-            <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-              {viewing.corpo}
-            </p>
-            {!viewing.para_todos && (
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-800 px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
-                <p className="font-semibold mb-1">Segmentação:</p>
-                {viewing.papeis?.length > 0 && <p>Cargos: {viewing.papeis.map(p => PAPEL_LABELS[p as keyof typeof PAPEL_LABELS] ?? p).join(', ')}</p>}
-                {viewing.canais?.length > 0 && <p>Canais: {viewing.canais.join(', ')}</p>}
+      {viewing && (() => {
+        const vExt = viewing as Comunicado & {
+          _isAnkData?: boolean
+          _anexos?: { nome: string; url: string; tipo: string }[]
+          _links?: { titulo: string; url: string }[]
+        }
+        const isAnkData = vExt._isAnkData === true
+        const anexos = vExt._anexos ?? []
+        const links  = vExt._links  ?? []
+
+        return (
+          <Modal open onClose={() => setViewing(null)} size="md"
+            title={viewing.titulo}
+            footer={<Button variant="secondary" onClick={() => setViewing(null)}>Fechar</Button>}
+          >
+            <div className="space-y-4">
+              {/* Tipo + data + badge AnK Data */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {isAnkData && (
+                  <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-ank-600 text-white">
+                    📢 AnK Data
+                  </span>
+                )}
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${TIPO_CONFIG[viewing.tipo]?.bg} ${TIPO_CONFIG[viewing.tipo]?.color} ${TIPO_CONFIG[viewing.tipo]?.border}`}>
+                  {TIPO_CONFIG[viewing.tipo]?.label}
+                </span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">
+                  {format(parseISO(viewing.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                </span>
               </div>
-            )}
-          </div>
-        </Modal>
-      )}
+
+              {/* Mensagem */}
+              <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                {viewing.corpo}
+              </p>
+
+              {/* Anexos (comunicados AnK Data) */}
+              {isAnkData && anexos.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                    Anexos
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {anexos.map((a, i) => (
+                      <button key={i} type="button" onClick={() => abrirAnexo(a.url)}
+                        className="flex items-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-800
+                          border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs
+                          text-ank-600 dark:text-ank-400 hover:bg-ank-50 dark:hover:bg-ank-950/30 transition-colors">
+                        📎 <span className="truncate max-w-[200px]">{a.nome}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Links (comunicados AnK Data) */}
+              {isAnkData && links.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                    Links
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {links.map((l, i) => (
+                      <a key={i} href={l.url} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-ank-600 dark:text-ank-400 hover:underline">
+                        🔗 {l.titulo}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Segmentação (só para comunicados internos da franquia) */}
+              {!isAnkData && !viewing.para_todos && (
+                <div className="rounded-xl bg-slate-50 dark:bg-slate-800 px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
+                  <p className="font-semibold mb-1">Segmentação:</p>
+                  {viewing.papeis?.length > 0 && <p>Cargos: {viewing.papeis.map(p => PAPEL_LABELS[p as keyof typeof PAPEL_LABELS] ?? p).join(', ')}</p>}
+                  {viewing.canais?.length > 0 && <p>Canais: {viewing.canais.join(', ')}</p>}
+                </div>
+              )}
+            </div>
+          </Modal>
+        )
+      })()}
 
       {/* Modal: Criar comunicado */}
       <CriarComunicadoModal
