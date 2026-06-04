@@ -7,7 +7,7 @@ import {
   BanknotesIcon, UsersIcon, Cog6ToothIcon, Bars3Icon,
   ChevronDownIcon, ChevronRightIcon,
   ArrowRightStartOnRectangleIcon, BuildingStorefrontIcon,
-  MegaphoneIcon, BellIcon,
+  MegaphoneIcon, BellIcon, LockClosedIcon, XMarkIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import { usePermissions } from '../../contexts/PermissionsContext'
@@ -47,7 +47,8 @@ const subInactive  = 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark
 const subActive    = 'franchise-nav-active text-white'
 
 export default function FranchiseSidebar() {
-  const { can } = usePermissions()
+  const { can, tenantCan } = usePermissions()
+  const [lockedModal, setLockedModal] = useState<{ label: string; slug: string } | null>(null)
   const { profile, signOut } = useAuth()
   const { pathname } = useLocation()
   const navigate = useNavigate()
@@ -105,6 +106,7 @@ export default function FranchiseSidebar() {
         <div>
           <p className={sectionLabel}>Menu</p>
           <ul className="space-y-0.5">
+            {/* Módulos liberados (contratados + acesso do papel) */}
             {modules.map(({ to, label, icon: Icon, end }) => (
               <li key={to}>
                 <NavLink to={to} end={end}
@@ -114,8 +116,104 @@ export default function FranchiseSidebar() {
                 </NavLink>
               </li>
             ))}
+
+            {/* Módulos bloqueados (não contratados pelo tenant) */}
+            {BASE_MODULES.filter(m =>
+              m.slug !== 'dashboard' && !tenantCan(m.slug) && !modules.find(mod => mod.to === m.to)
+            ).map(({ label, icon: Icon, slug }) => (
+              <li key={slug}>
+                <button
+                  type="button"
+                  onClick={() => setLockedModal({ label, slug })}
+                  className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium
+                    text-amber-700 dark:text-amber-500 bg-amber-50/60 dark:bg-amber-950/20
+                    border border-amber-200/70 dark:border-amber-800/40
+                    hover:bg-amber-100/80 dark:hover:bg-amber-950/40 hover:border-amber-300 dark:hover:border-amber-700
+                    transition-all group cursor-pointer"
+                  title={`${label} — clique para conhecer este módulo`}
+                >
+                  <Icon className="h-5 w-5 shrink-0 text-amber-500 dark:text-amber-400" />
+                  <span className="flex-1 text-left">{label}</span>
+                  <LockClosedIcon className="h-3.5 w-3.5 shrink-0 text-amber-400 dark:text-amber-500 group-hover:scale-110 transition-transform" />
+                </button>
+              </li>
+            ))}
           </ul>
         </div>
+
+        {/* Modal de módulo bloqueado */}
+        {lockedModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            onClick={() => setLockedModal(null)}>
+            <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl
+              border border-slate-200 dark:border-slate-700 overflow-hidden"
+              onClick={e => e.stopPropagation()}>
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <LockClosedIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                  </div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">{lockedModal.label}</p>
+                </div>
+                <button onClick={() => setLockedModal(null)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="px-5 py-5 space-y-4">
+                <div className="rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4">
+                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-400 mb-1">
+                    Módulo não contratado
+                  </p>
+                  <p className="text-xs text-amber-700 dark:text-amber-500 leading-relaxed">
+                    O módulo <strong>{lockedModal.label}</strong> não está incluído no plano atual da sua franquia.
+                    Entre em contato com a AnK Data para conhecer os benefícios e adicionar este módulo.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                    Fale com a AnK Data
+                  </p>
+                  <a href={`mailto:ti@ankdata.com.br?subject=Interesse no módulo ${lockedModal.label}`}
+                    className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700
+                      px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300
+                      hover:bg-ank-50 dark:hover:bg-ank-950/30 hover:border-ank-300 dark:hover:border-ank-700
+                      hover:text-ank-700 dark:hover:text-ank-400 transition-all">
+                    <span className="text-lg">✉️</span>
+                    <div>
+                      <p className="font-semibold">E-mail</p>
+                      <p className="text-xs text-slate-400">ti@ankdata.com.br</p>
+                    </div>
+                  </a>
+                  <a href={`https://wa.me/5567992423432?text=${encodeURIComponent(`Olá! Tenho interesse no módulo ${lockedModal.label} da plataforma AnK Data.`)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700
+                      px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300
+                      hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-300 dark:hover:border-emerald-700
+                      hover:text-emerald-700 dark:hover:text-emerald-400 transition-all">
+                    <span className="text-lg">💬</span>
+                    <div>
+                      <p className="font-semibold">WhatsApp</p>
+                      <p className="text-xs text-slate-400">Falar com consultor</p>
+                    </div>
+                  </a>
+                </div>
+              </div>
+
+              <div className="px-5 pb-5">
+                <button onClick={() => setLockedModal(null)}
+                  className="w-full rounded-xl bg-slate-100 dark:bg-slate-800 py-2.5 text-sm font-medium
+                    text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Atendimento — visível para todos */}
         <div>
