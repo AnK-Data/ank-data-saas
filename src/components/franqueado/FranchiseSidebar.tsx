@@ -7,7 +7,7 @@ import {
   BanknotesIcon, UsersIcon, Cog6ToothIcon, Bars3Icon,
   ChevronDownIcon, ChevronRightIcon,
   ArrowRightStartOnRectangleIcon, BuildingStorefrontIcon,
-  MegaphoneIcon, BellIcon, LockClosedIcon, XMarkIcon,
+  MegaphoneIcon, BellIcon, LockClosedIcon, XMarkIcon, FlagIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import { usePermissions } from '../../contexts/PermissionsContext'
@@ -35,6 +35,7 @@ const CONFIG_ITEMS = [
   { to: '/franqueado/configurar-menu', label: 'Configurar Menu',     icon: Bars3Icon              },
   { to: '/franqueado/lojas',           label: 'Lojas / PDVs',        icon: BuildingStorefrontIcon },
   { to: '/franqueado/usuarios',        label: 'Usuários',            icon: UsersIcon              },
+  { to: '/franqueado/metas',           label: 'Metas',               icon: FlagIcon               },
 ]
 
 const sidebarBg    = 'bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700'

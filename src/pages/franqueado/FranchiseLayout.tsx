@@ -20,6 +20,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/franqueado/configurar-menu': 'Configurar Menu',
   '/franqueado/lojas':           'Lojas / PDVs',
   '/franqueado/usuarios':        'Usuários da Franquia',
+  '/franqueado/metas':           'Gestão de Metas',
   '/franqueado/comunicados':     'Comunicados',
   '/franqueado/notificacoes':    'Notificações',
 }

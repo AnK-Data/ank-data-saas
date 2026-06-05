@@ -46,6 +46,7 @@ import LojasPage              from '../pages/franqueado/LojasPage'
 import FranchiseUsersPage     from '../pages/franqueado/FranchiseUsersPage'
 import ComunicadosPage        from '../pages/franqueado/ComunicadosPage'
 import NotificacoesPage       from '../pages/franqueado/NotificacoesPage'
+import MetasPage              from '../pages/franqueado/MetasPage'
 
 export function AppRouter() {
   return (
@@ -98,6 +99,7 @@ export function AppRouter() {
             <Route path="configurar-menu" element={<ConfigurarMenuPage />} />
             <Route path="lojas"           element={<LojasPage />} />
             <Route path="usuarios"        element={<FranchiseUsersPage />} />
+            <Route path="metas"           element={<MetasPage />} />
             <Route path="comunicados"     element={<ComunicadosPage />} />
             <Route path="notificacoes"    element={<NotificacoesPage />} />
           </Route>

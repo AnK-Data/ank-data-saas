@@ -301,3 +301,65 @@ export interface UserInviteData {
   usuario_extranet?: string
   cpf?: string
 }
+
+// ─── Módulo de Metas ──────────────────────────────────────────────────────────
+
+/** Mapeamento ciclo Boticário → mês do ano (17 ciclos/ano) */
+export const CICLO_MES: Record<number, number> = {
+  1: 1,  2: 1,  3: 2,  4: 3,  5: 3,  6: 4,
+  7: 5,  8: 5,  9: 6,  10: 7, 11: 7, 12: 8,
+  13: 9, 14: 9, 15: 10, 16: 11, 17: 12,
+}
+
+export const MESES_LABELS: Record<number, string> = {
+  1: 'Janeiro', 2: 'Fevereiro', 3: 'Março',    4: 'Abril',
+  5: 'Maio',    6: 'Junho',     7: 'Julho',     8: 'Agosto',
+  9: 'Setembro',10: 'Outubro',  11: 'Novembro', 12: 'Dezembro',
+}
+
+/** ciclo_key = YYYYCC (ex: "202510" = ano 2025, ciclo 10) */
+export function cicloKey(ano: number, ciclo: number): string {
+  return `${ano}${String(ciclo).padStart(2, '0')}`
+}
+
+export interface Meta {
+  id: string
+  tenant_id: string
+  ano: number
+  ciclo: number
+  mes: number
+  ciclo_key: string
+  cod_pdv: string
+  cod_cp: string
+  nome_cp: string | null
+  canal: 'LOJA' | 'VD'
+  marca: string
+  gmv: number | null
+  rpa: number | null
+  base_total: number | null
+  atividade_total: number | null
+  ativas_totais: number | null
+  ativas_totais_gb: number | null
+  penetracao: number | null
+  numero_boletos: number | null
+  boleto_medio: number | null
+  fonte: 'upload' | 'manual'
+  importado_por: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface MetaFilters {
+  ano?: number
+  ciclo?: number
+  mes?: number
+  canal?: 'LOJA' | 'VD'
+  marca?: string
+  cod_pdv?: string
+}
+
+export type MetaUpsertData = Omit<Meta, 'id' | 'ciclo_key' | 'created_at' | 'updated_at'>
+
+export const MARCAS_BOTICARIO = ['BOT', 'EUD', 'OUI', 'QDB'] as const
+export type MarcaBoticario = typeof MARCAS_BOTICARIO[number]
+
