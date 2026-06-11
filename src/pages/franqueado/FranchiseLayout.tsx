@@ -21,8 +21,10 @@ const PAGE_TITLES: Record<string, string> = {
   '/franqueado/lojas':           'Lojas / PDVs',
   '/franqueado/usuarios':        'Usuários da Franquia',
   '/franqueado/metas':           'Gestão de Metas',
-  '/franqueado/comunicados':     'Comunicados',
-  '/franqueado/notificacoes':    'Notificações',
+  '/franqueado/comunicados':        'Comunicados',
+  '/franqueado/notificacoes':       'Notificações',
+  '/franqueado/venda-direta':       'Venda Direta',
+  '/franqueado/venda-direta/folha': 'Folha VD',
 }
 
 export default function FranchiseLayout() {

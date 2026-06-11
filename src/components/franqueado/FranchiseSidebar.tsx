@@ -8,6 +8,7 @@ import {
   ChevronDownIcon, ChevronRightIcon,
   ArrowRightStartOnRectangleIcon, BuildingStorefrontIcon,
   MegaphoneIcon, BellIcon, LockClosedIcon, XMarkIcon, FlagIcon,
+  UserGroupIcon, ClipboardDocumentListIcon, TruckIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import { usePermissions } from '../../contexts/PermissionsContext'
@@ -21,7 +22,9 @@ const BASE_MODULES = [
   { to: '/franqueado/estoque',    slug: 'estoque',    label: 'Estoque',    icon: CubeIcon                  },
   { to: '/franqueado/crm',        slug: 'crm',        label: 'CRM',        icon: UsersIcon                 },
   { to: '/franqueado/financeiro', slug: 'financeiro', label: 'Financeiro', icon: BanknotesIcon             },
-  { to: '/franqueado/upload',     slug: 'upload',     label: 'Upload',     icon: CloudArrowUpIcon          },
+  { to: '/franqueado/venda-direta',    slug: 'venda-direta',  label: 'Venda Direta', icon: UserGroupIcon               },
+  { to: '/franqueado/logistica',       slug: 'logistica',     label: 'Logistica',     icon: TruckIcon                  },
+  { to: '/franqueado/folha',           slug: 'folha',         label: 'Folha',         icon: ClipboardDocumentListIcon },
 ]
 
 // Módulos de atendimento (sempre visíveis para todos os usuários autenticados)
@@ -36,6 +39,7 @@ const CONFIG_ITEMS = [
   { to: '/franqueado/lojas',           label: 'Lojas / PDVs',        icon: BuildingStorefrontIcon },
   { to: '/franqueado/usuarios',        label: 'Usuários',            icon: UsersIcon              },
   { to: '/franqueado/metas',           label: 'Metas',               icon: FlagIcon               },
+  { to: '/franqueado/upload',          label: 'Input Comercial',     icon: CloudArrowUpIcon       },
 ]
 
 const sidebarBg    = 'bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700'

@@ -47,6 +47,9 @@ import FranchiseUsersPage     from '../pages/franqueado/FranchiseUsersPage'
 import ComunicadosPage        from '../pages/franqueado/ComunicadosPage'
 import NotificacoesPage       from '../pages/franqueado/NotificacoesPage'
 import MetasPage              from '../pages/franqueado/MetasPage'
+import VendaDiretaPage       from '../pages/franqueado/venda-direta/VendaDiretaPage'
+import FolhaPage             from '../pages/franqueado/folha/FolhaPage'
+import LogisticaPage         from '../pages/franqueado/logistica/LogisticaPage'
 
 export function AppRouter() {
   return (
@@ -102,6 +105,10 @@ export function AppRouter() {
             <Route path="metas"           element={<MetasPage />} />
             <Route path="comunicados"     element={<ComunicadosPage />} />
             <Route path="notificacoes"    element={<NotificacoesPage />} />
+            <Route path="venda-direta"       element={<VendaDiretaPage />} />
+            <Route path="venda-direta/folha" element={<Navigate to="/franqueado/folha" replace />} />
+            <Route path="folha"              element={<FolhaPage />} />
+            <Route path="logistica"          element={<LogisticaPage />} />
           </Route>
         </Route>
 

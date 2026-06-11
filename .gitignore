@@ -1,34 +1,71 @@
-# Dependencies
+# ── Node ──────────────────────────────────────────────────────────────────────
 node_modules/
 .pnp
 .pnp.js
-
-# Build output
-dist/
-dist-ssr/
-
-# Environment variables (NEVER commit real credentials)
-.env
-.env.local
-.env.*.local
-
-# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-# Editor directories
+# ── Build ─────────────────────────────────────────────────────────────────────
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# ── Variáveis de ambiente (NUNCA commitar credenciais reais) ──────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Supabase ──────────────────────────────────────────────────────────────────
+supabase/.temp/
+# Não ignorar: supabase/functions/, supabase/migrations/, supabase/config.toml
+
+# ── Credenciais / chaves de serviço ───────────────────────────────────────────
+*service_account*.json
+*-credentials.json
+*-key.json
+secrets/
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+
+# ── Editores ──────────────────────────────────────────────────────────────────
 .vscode/*
 !.vscode/extensions.json
 .idea/
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# TypeScript cache
-*.tsbuildinfo
+# ── Sistema operacional ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Vercel ────────────────────────────────────────────────────────────────────
+.vercel/
+
+# ── Arquivos de dados (sensíveis / pesados) ───────────────────────────────────
+*.parquet
+*.csv
+*.xlsx
+*.xls
+
+# ── Claude Code (memória e sessões locais) ────────────────────────────────────
+.claude/
+
+# ── Arquivos internos de desenvolvimento ─────────────────────────────────────
+PROMPT_*.md
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.local
+*.log

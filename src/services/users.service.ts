@@ -57,8 +57,16 @@ export const UsersService = {
     return { data: data.user, error: profileError }
   },
 
-  updateProfile: (id: string, data: { nome?: string; papel?: UserRole; tenant_id?: string | null }) =>
-    supabase.from('profiles').update(data).eq('id', id),
+  updateProfile: (id: string, data: {
+    nome?: string
+    papel?: UserRole
+    tenant_id?: string | null
+    status?: 'Ativo' | 'Inativo'
+    canal?: string | null
+    cpf?: string | null
+    usuario_extranet?: string | null
+    dominio?: 'ank' | 'franqueado'
+  }) => supabase.from('profiles').update(data).eq('id', id),
 
   removeFromTenant: (id: string) =>
     supabase.from('profiles').update({ tenant_id: null }).eq('id', id),

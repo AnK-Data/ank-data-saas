@@ -363,3 +363,69 @@ export type MetaUpsertData = Omit<Meta, 'id' | 'ciclo_key' | 'created_at' | 'upd
 export const MARCAS_BOTICARIO = ['BOT', 'EUD', 'OUI', 'QDB'] as const
 export type MarcaBoticario = typeof MARCAS_BOTICARIO[number]
 
+// --- Modulo Venda Direta ---
+
+export type VDQueryType =
+  | 'overview' | 'revendedoras' | 'supervisores'
+  | 'estruturas' | 'produtos' | 'folha' | 'ciclos_list' | 'logistica'
+
+export interface VDFilters {
+  ciclo?:          string
+  ano?:            string
+  marca?:          string
+  supervisor?:     string
+  estrutura?:      string
+  meio_captacao?:  string
+}
+
+export type PapelRevendedora =
+  | 'Bronze' | 'Prata' | 'Ouro' | 'Platina' | 'Rubi'
+  | 'Esmeralda GB' | 'Diamante GB' | 'Revendedor' | 'Consumidor Final'
+
+export interface VDRevendedora {
+  cod_revendedor:  string
+  nome_vendedor:   string
+  papel:           PapelRevendedora
+  cod_usuario:     string
+  nome_supervisor: string
+  nome_estrutura:  string
+  cidade:          string
+  receita_bruta:   number
+  receita_liquida: number
+  volume:          number
+  pedidos:         number
+}
+
+export interface VDSupervisor {
+  nome_supervisor:     string
+  supervisor_curto:    string
+  revendedoras_ativas: number
+  receita_bruta:       number
+  receita_liquida:     number
+  volume:              number
+  pedidos:             number
+  estruturas:          string[]
+}
+
+export interface VDFolhaItem {
+  tipo:             'supervisor' | 'revendedora'
+  nome:             string
+  cpf:              string | null
+  usuario_extranet: string | null
+  papel:            string
+  estrutura:        string
+  canal:            string
+  receita_bruta:    number
+  receita_liquida:  number
+  volume:           number
+  pedidos:          number
+  meta_gmv?:        number | null
+  desempenho_pct?:  number | null
+}
+
+// "02/2024" -> { ciclo: 2, ano: 2024 }
+export function parseCicloStr(s: string): { ciclo: number; ano: number } {
+  const [c, a] = s.split('/')
+  return { ciclo: parseInt(c, 10), ano: parseInt(a, 10) }
+}
+

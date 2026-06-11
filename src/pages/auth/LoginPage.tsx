@@ -70,11 +70,11 @@ export default function LoginPage() {
         <div className="relative z-10 flex flex-col items-center text-center px-12">
           <AnkLogo variant="light" height={200} className="mb-8 drop-shadow-2xl" />
           <p className="text-base text-white/50 max-w-xs leading-snug text-center">
-            Inteligência de dados para o varejo de cosméticos do Grupo Boticário
+            Inteligência de dados para o varejo de cosméticos
           </p>
           <AnkMascot height={200} className="mt-6 drop-shadow-xl opacity-80" />
           <div className="mt-4 flex flex-wrap justify-center gap-2">
-            {['Sell-Out', 'Estoque', 'CRM', 'Financeiro', 'Conformidade', 'IA'].map(m => (
+            {['Sell-Out', 'Estoque', 'CRM', 'Financeiro', 'Conformidade'].map(m => (
               <span key={m} className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/60 ring-1 ring-white/10">{m}</span>
             ))}
           </div>

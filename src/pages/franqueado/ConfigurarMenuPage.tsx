@@ -19,7 +19,8 @@ const BASE_ITEMS: MenuItem[] = [
   { id: '3', label: 'Estoque',    slug: 'estoque',    visible: true, order: 3 },
   { id: '4', label: 'CRM',        slug: 'crm',        visible: true, order: 4 },
   { id: '5', label: 'Financeiro', slug: 'financeiro', visible: true, order: 5 },
-  { id: '6', label: 'Upload',     slug: 'upload',     visible: true, order: 6 },
+  { id: '6', label: 'Upload',       slug: 'upload',       visible: true, order: 6 },
+  { id: '7', label: 'Venda Direta', slug: 'venda-direta', visible: true, order: 7 },
 ]
 
 function mergeWithSaved(tenantId: string): MenuItem[] {

@@ -16,7 +16,11 @@ interface PlanoCatalogo {
   nome: string
   preco_mensal: number | null
   preco_setup: number | null
+  feature_slugs: string[] | null
 }
+
+// Slugs que caracterizam um "modulo de canal" (pre-requisito para Folha)
+const SECTOR_SLUGS = ['venda-direta', 'varejo', 'logistica']
 
 // ─── Helpers visuais ─────────────────────────────────────────────────────────
 
@@ -79,7 +83,7 @@ export default function ClienteModal({ open, initial, onClose, onSaved }: {
 
   // Carrega módulos do catálogo
   useEffect(() => {
-    supabase.from('planos_catalogo').select('id, nome, preco_mensal, preco_setup')
+    supabase.from('planos_catalogo').select('id, nome, preco_mensal, preco_setup, feature_slugs')
       .eq('ativo', true).order('preco_mensal', { ascending: true, nullsFirst: false })
       .then(({ data }) => setModulos((data ?? []) as PlanoCatalogo[]))
   }, [])
@@ -112,6 +116,13 @@ export default function ClienteModal({ open, initial, onClose, onSaved }: {
   const descontoNum = parseFloat(desconto) || 0
   const mrrFinal    = Math.max(0, subtotalModulos - descontoNum)
 
+  // Validacao: Folha exige ao menos um modulo de canal
+  const folhaIds  = modulos.filter(m => m.feature_slugs?.includes('folha')).map(m => m.id)
+  const setorIds  = modulos.filter(m => m.feature_slugs?.some(s => SECTOR_SLUGS.includes(s))).map(m => m.id)
+  const folhaSelecionada = modulosSelecionados.some(id => folhaIds.includes(id))
+  const temSetor         = modulosSelecionados.some(id => setorIds.includes(id))
+  const folhaSemSetor    = folhaSelecionada && !temSetor
+
   // Cálculo setup (único)
   const subtotalSetup = modulos
     .filter(m => modulosSelecionados.includes(m.id) && m.preco_setup)
@@ -131,6 +142,11 @@ export default function ClienteModal({ open, initial, onClose, onSaved }: {
     if (criarUsuario && isNew) {
       if (!emailAdmin.trim()) { toast.error('E-mail do admin obrigatório.'); return }
       if (senhaAdmin.length < 8) { toast.error('Senha deve ter ao menos 8 caracteres.'); return }
+    }
+    if (folhaSemSetor) {
+      toast.error('O módulo Folha exige ao menos um módulo de canal contratado (Venda Direta, Varejo ou Logística).')
+      setTab('franquia')
+      return
     }
     setSaving(true)
     try {
@@ -326,6 +342,16 @@ export default function ClienteModal({ open, initial, onClose, onSaved }: {
                       </div>
                     </label>
                   ))}
+                </div>
+              )}
+              {folhaSemSetor && (
+                <div className="flex items-start gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-2.5">
+                  <span className="text-base shrink-0">⚠️</span>
+                  <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                    <strong>Módulo complementar:</strong> Folha exige ao menos um módulo de canal —
+                    {' '}<strong>Venda Direta</strong>, <strong>Varejo</strong> ou <strong>Logística</strong>.
+                    Adicione um deles para continuar.
+                  </p>
                 </div>
               )}
               {modulosSelecionados.length > 0 && subtotalModulos > 0 && (

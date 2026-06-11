@@ -1,5 +1,5 @@
 # ANK Data — Dependências Python
-# Scripts de processamento e padronização de dados (pasta scripts/)
+# Usadas por scripts auxiliares de processamento de dados (pasta scripts/)
 #
 # Instalação:
 #   pip install -r requirements.txt
@@ -9,8 +9,7 @@ pandas>=2.0.0
 openpyxl>=3.1.0
 xlrd>=2.0.1
 
-# Normalização de strings (nomes, endereços)
-# unicodedata e re são built-in do Python — não precisam de instalação
+# Utilitários de ambiente
+python-dotenv>=1.0.0
 
-# Utilitários
-python-dotenv>=1.0.0    # Leitura de variáveis de ambiente (.env)
+# Nota: unicodedata e re são módulos built-in do Python — não precisam ser instalados.
