@@ -410,7 +410,7 @@ function EditUserModal({ open, user, onClose, onSaved }: {
   return (
     <Modal open={open} onClose={onClose}
       title={`Editar — ${user?.nome ?? ''}`}
-      size="sm"
+      size="lg"
       footer={
         <>
           <Button variant="secondary" onClick={onClose} disabled={saving}>Cancelar</Button>
